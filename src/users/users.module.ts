@@ -13,6 +13,7 @@ import { HabPosts } from 'src/habs/hab-posts.model';
 import { HabAuthors } from 'src/habs/hab-authors.model';
 import { HabSubscribers } from 'src/habs/hab-subscribers.model';
 import { UserSubscriptions } from './user-subscriptions-model';
+import { PostsModule } from 'src/posts/posts.module';
 
 @Module({
   controllers: [UsersController],
@@ -20,6 +21,7 @@ import { UserSubscriptions } from './user-subscriptions-model';
   imports:[
     SequelizeModule.forFeature([User, Role, UserRoles, PostModel, Hab, HabPosts, HabAuthors, HabSubscribers, UserSubscriptions]),
     RolesModule,
+    PostsModule,
     forwardRef(() => AuthModule),
   ],
   exports:[
