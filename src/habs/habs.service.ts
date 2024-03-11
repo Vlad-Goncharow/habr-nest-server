@@ -50,20 +50,24 @@ export class HabsService {
 
 
   async loadShortHabById(id:number){
-    const hab = await this.habRepository.findByPk(Number(id))
+    const hab = await this.habRepository.findByPk(id)
     const posts = await this.habPostsModel.findAndCountAll({
       where: { habId: id },
       include: [{all:true},]
     })
-    const authors = await this.habAuthorsModel.findAndCountAll({
-      where: { habId: id },
-      include: [{all:true},]
+    const authors = await this.habRepository.findOne({
+      where: { id },
+      include: [
+        {
+          model: User,
+          as: 'usersSubscribers',
+        },
+      ]
     })
-
     return {
       hab,
       posts: posts.count,
-      authors:authors.count
+      subscribers: authors.usersSubscribers.length
     }
   }
 
@@ -112,7 +116,7 @@ export class HabsService {
   }
 
   async subscribeToHab(dto: SubscribeDto){
-    const user = await this.usersService.loadUserById(dto.userId)
+    const user = await this.usersService.loadCurrentUserById(dto.userId)
     if (!user) {
       throw new NotFoundException('Пользователь не найден');
     }
@@ -138,7 +142,7 @@ export class HabsService {
   }
 
   async unSubscribeToHab(dto: SubscribeDto) {
-    const user = await this.usersService.loadUserById(dto.userId)
+    const user = await this.usersService.loadCurrentUserById(dto.userId)
     if (!user) {
       throw new NotFoundException('Пользователь не найден');
     }

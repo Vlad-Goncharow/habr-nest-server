@@ -47,7 +47,7 @@ export class AuthService {
       throw new HttpException({message:"Неверный пароль",error:[{param:'password'}]}, HttpStatus.BAD_REQUEST)
     }
 
-    const user = await this.userService.loadUserById(userEmail.id)
+    const user = await this.userService.loadCurrentUserById(userEmail.id)
     const accessToken = await this.generateToken(user)
     const refreshToken = await this.refreshTokenServie.generateRefreshToken(user)
     const { token } = await this.refreshTokenServie.saveToken(user.id, refreshToken)
@@ -71,7 +71,7 @@ export class AuthService {
       throw new UnauthorizedException()
     }
 
-    const user = await this.userService.loadUserById(userData.id)
+    const user = await this.userService.loadCurrentUserById(userData.id)
     if(!user){
       throw new UnauthorizedException()
     }

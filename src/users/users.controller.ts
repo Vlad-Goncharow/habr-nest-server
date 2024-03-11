@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Roles } from 'src/auth/roles-auth.decorator';
 import { RolesGuard } from 'src/auth/roles.guard';
@@ -30,19 +30,32 @@ export class UsersController {
   }
 
 
-  //Получение пользователья
+  //Получение пользователя
   @ApiOperation({ summary: "Получение пользователя" })
   @Get('/:userId')
-  async loadUserById(@Param('userId') userId: string) {
-    return this.usersService.loadUserById(Number(userId))
+  async getUserById(@Param('userId') userId: string) {
+    return this.usersService.getUserById(Number(userId))
+  }
+
+
+  //Получение хабов пользователя на которые он подписан
+  @ApiOperation({ summary: "Получение хабов пользователя на которые он подписан" })
+  @Get('/:userId/habs')
+  async loadUserHabs(@Param('userId') userId: string) {
+    return this.usersService.loadUserHabs(Number(userId))
   }
 
 
   //Получение постов пользователя
   @ApiOperation({ summary: "Получение постов пользователя" })
-  @Get('/:userId/posts')
-  async loadUserPostsById(@Param('userId') userId: string) {
-    return this.usersService.loadUserPostsById(userId)
+  @Get('/:userId/:type')
+  async loadUserPostsById(
+    @Param('userId') userId: string,
+    @Param('type') type: string,
+    @Query('page') page: number,
+    @Query('pageSize') pageSize: number,
+  ) {
+    return this.usersService.loadUserPostsById(Number(userId), type, Number(page), Number(pageSize))
   }
 
 

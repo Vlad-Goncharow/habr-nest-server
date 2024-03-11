@@ -12,7 +12,7 @@ import { UserSubscriptions } from './user-subscriptions-model';
 export class UsersService {
 
   constructor(@InjectModel(User) private userRepository: typeof User,
-                                 private roleService: RolesService){}
+                                 private roleService: RolesService,){}
 
   //create new user
   async createUser(dto: CreateUserDto) {
@@ -76,19 +76,53 @@ export class UsersService {
     return user
   }
 
-  //load user
-  async loadUserById(userId: number) {
-    const user = await this.userRepository.findByPk(userId, {include:{all:true}})
+  //load current user
+  async getUserById(userId: number) {
+    const user = await this.userRepository.findByPk(userId, {
+      attributes: { exclude: ['password'] },
+      include: [
+        {
+          model: User,
+          as: 'subscribers',
+          through: { attributes: [] },
+          attributes: ['id'],
+        },
+        {
+          model: Hab,
+          through: { attributes: [] },
+          attributes: ['id', 'title']
+        }
+      ]
+    })
 
-    if(!user) {
+    if (!user) {
       throw new HttpException('Данный пользователь не найден', HttpStatus.NOT_FOUND)
     }
 
     return user
   }
 
+  //load user habs subscribe
+  async loadUserHabs(userId:number){
+    const user = await this.userRepository.findByPk(userId, {
+      include: [
+        {
+          model: Hab,
+          through: { attributes: [] },
+          attributes: ['id', 'title']
+        }
+      ]
+    })
+
+    if (!user) {
+      throw new HttpException('Данный пользователь не найден', HttpStatus.NOT_FOUND)
+    }
+
+    return user.habSubscribers
+  }
+
   //load user posts 
-  async loadUserPostsById(userId: string) {
+  async loadUserPostsById(userId: number, type: string, page: number, pageSize: number) {
     const user = await this.userRepository.findByPk(userId,{
       include:[{
         model:PostModel,
@@ -169,5 +203,38 @@ export class UsersService {
     return {
       success:true
     }
+  }
+
+
+  //load current user
+  async loadCurrentUserById(userId: number) {
+    const user = await this.userRepository.findByPk(userId, {
+      include:[
+        {
+          model:User,
+          through:{attributes:[]},
+          as:'subscribers',
+          attributes:['id']
+        },
+        {
+          model: User,
+          through: { attributes: [] },
+          as: 'subscriptions',
+          attributes: ['id']
+        },
+        {
+          model: Hab,
+          through: { attributes: [] },
+          as: 'habSubscribers',
+          attributes: ['id']
+        }
+      ]
+    })
+
+    if (!user) {
+      throw new HttpException('Данный пользователь не найден', HttpStatus.NOT_FOUND)
+    }
+
+    return user
   }
 }

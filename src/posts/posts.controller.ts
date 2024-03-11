@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { PostsService } from './posts.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -36,9 +36,13 @@ export class PostsController {
 
   //Получение постов
   @ApiOperation({ summary: 'Получение постов' })
-  @Get('/:category/:type/:page')
-  loadPosts(@Param('category') category: string, @Param('type') type: string, @Param('page') page: string,){
-    return this.postsService.loadPosts(category, type, Number(page))
+  @Get('/:category/:type')
+  loadPosts(
+    @Param('category') category: string, 
+    @Param('type') type: string, 
+    @Query('page') page: number,
+    @Query('pageSize') pageSize: number,){
+    return this.postsService.loadPosts(category, type, Number(page), Number(pageSize))
   }
 
   //Удаление поста
