@@ -46,19 +46,6 @@ export class UsersController {
   }
 
 
-  //Получение постов пользователя
-  @ApiOperation({ summary: "Получение постов пользователя" })
-  @Get('/:userId/:type')
-  async loadUserPostsById(
-    @Param('userId') userId: string,
-    @Param('type') type: string,
-    @Query('page') page: number,
-    @Query('pageSize') pageSize: number,
-  ) {
-    return this.usersService.loadUserPostsById(Number(userId), type, Number(page), Number(pageSize))
-  }
-
-
   //Подписка на человека
   @ApiOperation({ summary: "Подписка на человека" })
   @UseGuards(JwtAuthGuard)

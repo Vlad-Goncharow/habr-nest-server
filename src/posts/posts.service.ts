@@ -141,11 +141,32 @@ export class PostsService {
   }
 
   async loadUserPosts(userId:number, type:string, page:number, pageSize:number){
-    const posts = await this.postRepository.findAll({
-      where:{userId, type},
-      include:[{all:true}]
-    })
+    const offset = (page - 1) * pageSize;
 
-    return posts
+    const { count } = await this.postRepository.findAndCountAll({
+      where: { userId, type },
+    });
+
+    const postsWithInclude = await this.postRepository.findAll({
+      where: { userId, type },
+      include: [
+        {
+          model: User,
+          attributes: ['id', 'avatar', 'nickname']
+        },
+        {
+          model: Hab,
+          through: { attributes: [] },
+          attributes: ['id', 'title']
+        },
+      ],
+      limit: pageSize,
+      offset: offset,
+    });
+    
+    return {
+      posts: postsWithInclude,
+      length: count
+    };
   }
 }

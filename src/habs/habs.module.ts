@@ -8,7 +8,6 @@ import { PostModel } from 'src/posts/posts.model';
 import { User } from 'src/users/users.model';
 import { HabAuthors } from './hab-authors.model';
 import { HabSubscribers } from './hab-subscribers.model';
-import { UsersModule } from 'src/users/users.module';
 import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
@@ -17,7 +16,6 @@ import { AuthModule } from 'src/auth/auth.module';
   imports:[
     SequelizeModule.forFeature([Hab, HabPosts, HabAuthors, HabSubscribers, PostModel, User]),
     AuthModule,
-    UsersModule
   ],
   exports:[
     HabsService,

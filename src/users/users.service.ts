@@ -7,12 +7,14 @@ import { RolesService } from 'src/roles/roles.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './users.model';
 import { UserSubscriptions } from './user-subscriptions-model';
+import { PostsService } from 'src/posts/posts.service';
 
 @Injectable()
 export class UsersService {
 
   constructor(@InjectModel(User) private userRepository: typeof User,
-                                 private roleService: RolesService,){}
+                                 private roleService: RolesService,
+                                 private postService: PostsService,){}
 
   //create new user
   async createUser(dto: CreateUserDto) {
@@ -121,32 +123,7 @@ export class UsersService {
     return user.habSubscribers
   }
 
-  //load user posts 
-  async loadUserPostsById(userId: number, type: string, page: number, pageSize: number) {
-    const user = await this.userRepository.findByPk(userId,{
-      include:[{
-        model:PostModel,
-        include:[
-          {
-            model: User,
-            attributes: ['id', 'avatar', 'nickname']
-          },
-          {
-            model: Hab,
-            through: { attributes: [] },
-            attributes: ['id', 'title']
-          },
-        ]
-      }]
-    })
-
-    if (!user) {
-      throw new HttpException('Данный пользователь не найден', HttpStatus.NOT_FOUND)
-    }
-
-    return user.posts
-  }
-
+ 
   //subscribe
   async subscribe(id:number, userId:number){
     const subscription = await UserSubscriptions.findOne({

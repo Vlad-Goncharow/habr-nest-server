@@ -8,7 +8,6 @@ import { HabPosts } from './hab-posts.model';
 import { HabAuthors } from './hab-authors.model';
 import { SubscribeDto } from './dto/subscribe-hab.dto';
 import { HabSubscribers } from './hab-subscribers.model';
-import { UsersService } from 'src/users/users.service';
 
 
 @Injectable()
@@ -17,8 +16,7 @@ export class HabsService {
   constructor(@InjectModel(Hab) private habRepository: typeof Hab, 
   @InjectModel(HabPosts) private habPostsModel: typeof HabPosts,
   @InjectModel(HabAuthors)  private habAuthorsModel: typeof HabAuthors,
-  @InjectModel(HabSubscribers)  private habSubscribersModel: typeof HabAuthors,
-  private usersService: UsersService){}
+  @InjectModel(HabSubscribers) private habSubscribersModel: typeof HabSubscribers){}
 
   async createHab(createHabDto: CreateHabDto) {
     const findHab = await this.habRepository.findOne({where:{title:createHabDto.title}})
@@ -116,11 +114,6 @@ export class HabsService {
   }
 
   async subscribeToHab(dto: SubscribeDto){
-    const user = await this.usersService.loadCurrentUserById(dto.userId)
-    if (!user) {
-      throw new NotFoundException('Пользователь не найден');
-    }
-    
     const hab = await this.loadHabById(Number(dto.habId))
     if (!hab) {
       throw new NotFoundException('Хаб не найден');
@@ -142,11 +135,6 @@ export class HabsService {
   }
 
   async unSubscribeToHab(dto: SubscribeDto) {
-    const user = await this.usersService.loadCurrentUserById(dto.userId)
-    if (!user) {
-      throw new NotFoundException('Пользователь не найден');
-    }
-
     const hab = await this.loadHabById(Number(dto.habId))
     if (!hab) {
       throw new NotFoundException('Хаб не найден');

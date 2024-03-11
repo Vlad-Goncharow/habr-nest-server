@@ -53,4 +53,16 @@ export class PostsController {
   delePostById(@Param('postId') postId:string){
     return this.postsService.delePostById(postId)
   }
+
+
+  //Получение постов юзера
+  @ApiOperation({ summary: 'Получение постов юзера' })
+  @Get('/user/:userId/:type')
+  loadUserPosts(
+    @Param('userId') userId: string,
+    @Param('type') type: string,
+    @Query('page') page: number,
+    @Query('pageSize') pageSize: number,) {
+    return this.postsService.loadUserPosts(Number(userId), type, Number(page), Number(pageSize))
+  }
 }
