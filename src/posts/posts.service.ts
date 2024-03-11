@@ -69,9 +69,8 @@ export class PostsService {
   }
 
 
-  async loadPosts(category:string, type:string, page:number){
-    const limit = 2; // количество постов на странице
-    const offset = (page - 1) * limit;
+  async loadPosts(category: string, type: string, page: number, pageSize){
+    const offset = (page - 1) * pageSize;
 
     const { count } = await this.postRepository.findAndCountAll({
       where: { category, type },
@@ -90,7 +89,7 @@ export class PostsService {
           attributes: ['id', 'title']
         },
       ],
-      limit,
+      limit: pageSize,
       offset: offset,
     });
     return {
@@ -139,5 +138,14 @@ export class PostsService {
     return {
       success:true
     }
+  }
+
+  async loadUserPosts(userId:number, type:string, page:number, pageSize:number){
+    const posts = await this.postRepository.findAll({
+      where:{userId, type},
+      include:[{all:true}]
+    })
+
+    return posts
   }
 }
