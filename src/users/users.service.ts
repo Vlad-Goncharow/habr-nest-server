@@ -13,8 +13,7 @@ import { PostsService } from 'src/posts/posts.service';
 export class UsersService {
 
   constructor(@InjectModel(User) private userRepository: typeof User,
-                                 private roleService: RolesService,
-                                 private postService: PostsService,){}
+                                 private roleService: RolesService){}
 
   //create new user
   async createUser(dto: CreateUserDto) {
@@ -103,26 +102,6 @@ export class UsersService {
 
     return user
   }
-
-  //load user habs subscribe
-  async loadUserHabs(userId:number){
-    const user = await this.userRepository.findByPk(userId, {
-      include: [
-        {
-          model: Hab,
-          through: { attributes: [] },
-          attributes: ['id', 'title']
-        }
-      ]
-    })
-
-    if (!user) {
-      throw new HttpException('Данный пользователь не найден', HttpStatus.NOT_FOUND)
-    }
-
-    return user.habSubscribers
-  }
-
  
   //subscribe
   async subscribe(id:number, userId:number){
@@ -181,7 +160,6 @@ export class UsersService {
       success:true
     }
   }
-
 
   //load current user
   async loadCurrentUserById(userId: number) {

@@ -77,4 +77,12 @@ export class HabsController {
   async unSubscribeToHab(@Body() subscribeDto: SubscribeDto) {
     return this.habsService.unSubscribeToHab(subscribeDto);
   }
+
+
+  //Получение хабов пользователя на которые он подписан
+  @ApiOperation({ summary: "Получение хабов пользователя на которые он подписан" })
+  @Get('/:userId/subscribers')
+  async loadUserHabs(@Param('userId') userId: string) {
+    return this.habsService.loadUserHabs(Number(userId))
+  }
 }
