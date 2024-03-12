@@ -169,4 +169,21 @@ export class HabsService {
 
     // author.destroy()
   }
+
+
+  async loadUserHabs(userId:number){
+    const data = await this.habSubscribersModel.findAll({
+      where:{userId},
+      include:[
+        {
+          model: Hab,
+          attributes: ['id', 'title']
+        }
+      ]
+    })
+
+    const habs = data.map((el) => el.hab)
+
+    return habs
+  }
 }

@@ -38,14 +38,6 @@ export class UsersController {
   }
 
 
-  //Получение хабов пользователя на которые он подписан
-  @ApiOperation({ summary: "Получение хабов пользователя на которые он подписан" })
-  @Get('/:userId/habs')
-  async loadUserHabs(@Param('userId') userId: string) {
-    return this.usersService.loadUserHabs(Number(userId))
-  }
-
-
   //Подписка на человека
   @ApiOperation({ summary: "Подписка на человека" })
   @UseGuards(JwtAuthGuard)
