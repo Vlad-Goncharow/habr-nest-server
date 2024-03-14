@@ -56,4 +56,17 @@ export class UsersController {
     const { id } = req.user
     return this.usersService.unSubscribe(id, Number(userId))
   }
+
+
+  //load user subs
+  @ApiOperation({ summary: "load user subs" })
+  @Get('/subs/:userId/:type')
+  async loadUserSubs(
+    @Param('userId') userId: string,
+    @Param('type') type: string,
+    @Query('page') page: number,
+    @Query('pageSize') pageSize: number,
+  ) {
+    return this.usersService.loadUserSubs(Number(userId), type, Number(page), Number(pageSize))
+  }
 }

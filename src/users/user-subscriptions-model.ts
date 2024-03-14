@@ -14,11 +14,9 @@ export class UserSubscriptions extends Model<UserSubscriptions> {
   @Column({ type: DataType.INTEGER })
   subscriptionId: number;
 
-  @BelongsTo(() => User)
-  user: User;
+  @BelongsTo(() => User, 'subscriberId')
+  subscribers: User;
 
-  // @ForeignKey(() => User)
-  // @Column({ type: DataType.INTEGER })
-  // subId: number;
-
+  @BelongsTo(() => User, 'subscriptionId')
+  subscriptions: User;
 }
