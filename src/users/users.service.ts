@@ -161,6 +161,35 @@ export class UsersService {
     }
   }
 
+  //load user subs
+  async loadUserSubs(userId:number, type:string, page:number, pageSize:number){
+    const offset = (page - 1) * pageSize;
+
+    const whereType = type === 'subscriptions' ? { subscriberId: userId } : (type === 'subscribers' ? { subscriptionId: userId } : null);
+
+    const { count } = await UserSubscriptions.findAndCountAll({
+      where: whereType,
+    });
+
+    const user1 = await UserSubscriptions.findAll({ 
+      where: whereType, 
+      include:[
+        {
+          model: User,
+          as: type, // Подписчики
+          attributes: { exclude: ['password'] }
+        },
+      ],
+      limit: pageSize,
+      offset: offset,
+    })
+
+    return {
+      length:count,
+      [type]: user1.map(el => el[type])
+    }
+  }
+
   //load current user
   async loadCurrentUserById(userId: number) {
     const user = await this.userRepository.findByPk(userId, {

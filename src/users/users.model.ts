@@ -75,12 +75,19 @@ export class User extends Model<User, UserCreationAttrs> {
   @BelongsToMany(() => Hab, () => HabSubscribers)
   habSubscribers: Hab[];
 
-  @ApiProperty({ description: "Подписки пользователя", type: () => [User] })
-  @BelongsToMany(() => User, () => UserSubscriptions, 'subscriberId', 'subscriptionId')
+  @BelongsToMany(() => User, {
+    through: { model: () => UserSubscriptions, unique: false },
+    foreignKey: 'subscriberId',
+    otherKey: 'subscriptionId',
+    as: 'subscriptions'
+  })
   subscriptions: User[];
 
-  @ApiProperty({ description: "Подписчики пользователя", type: () => [User] })
-  @BelongsToMany(() => User, () => UserSubscriptions, 'subscriptionId', 'subscriberId')
+  @BelongsToMany(() => User, {
+    through: { model: () => UserSubscriptions, unique: false },
+    foreignKey: 'subscriptionId',
+    otherKey: 'subscriberId',
+    as: 'subscribers'
+  })
   subscribers: User[];
-
 }
