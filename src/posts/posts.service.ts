@@ -8,6 +8,7 @@ import { Hab } from 'src/habs/habs.model';
 import { User } from 'src/users/users.model';
 import { FilesService } from 'src/files/files.service';
 import { Op } from 'sequelize';
+import { HabPosts } from 'src/habs/hab-posts.model';
 
 @Injectable()
 export class PostsService {
@@ -67,7 +68,6 @@ export class PostsService {
 
     return post
   }
-
 
   async loadPosts(category: string, type: string, page: number, pageSize){
     const offset = (page - 1) * pageSize;
@@ -143,11 +143,7 @@ export class PostsService {
   async loadUserPosts(userId:number, type:string, page:number, pageSize:number){
     const offset = (page - 1) * pageSize;
 
-    const { count } = await this.postRepository.findAndCountAll({
-      where: { userId, type },
-    });
-
-    const postsWithInclude = await this.postRepository.findAll({
+    const { count, rows } = await this.postRepository.findAndCountAll({
       where: { userId, type },
       include: [
         {
@@ -162,10 +158,44 @@ export class PostsService {
       ],
       limit: pageSize,
       offset: offset,
+      distinct: true,
     });
     
     return {
-      posts: postsWithInclude,
+      posts: rows,
+      length: count
+    };
+  }
+
+  async loadHabPosts(habId: number, type: string, page: number, pageSize: number) {
+    const offset = (page - 1) * pageSize;
+
+    const { count, rows } = await HabPosts.findAndCountAll({
+      where: { habId },
+      include: [
+        {
+          model: PostModel,
+          where:{type},
+          include:[
+            {
+              model: User,
+              attributes: ['id', 'avatar', 'nickname']
+            },
+            {
+              model: Hab,
+              through: { attributes: [] },
+              attributes: ['id', 'title']
+            },
+          ]
+        },
+      ],
+      limit: pageSize,
+      offset: offset,
+      distinct: true,
+    });
+
+    return {
+      posts: rows.map(habPost => habPost.post),
       length: count
     };
   }

@@ -26,8 +26,12 @@ export class PostModel extends Model<PostModel, PostCreationAttrs> {
   image: string;
 
   @ApiProperty({ example: 'example', description: 'Текст поста' })
-  @Column({ type: DataType.STRING, allowNull: false })
+  @Column({ type: DataType.TEXT, allowNull: false })
   content: string;
+
+  @ApiProperty({ example: 'example', description: 'Сложность поста' })
+  @Column({ type: DataType.STRING, allowNull: false })
+  difficulty: string;
 
   @ApiProperty({ example: 'avatar.jpg', description: 'Колличество просмотров' })
   @Column({ type: DataType.INTEGER, defaultValue: 0 })

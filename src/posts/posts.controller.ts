@@ -65,4 +65,17 @@ export class PostsController {
     @Query('pageSize') pageSize: number,) {
     return this.postsService.loadUserPosts(Number(userId), type, Number(page), Number(pageSize))
   }
+
+
+
+  //Получение посто хаба
+  @ApiOperation({ summary: 'Получение посто хаба' })
+  @Get('/hab/:habId/:type')
+  loadHabPosts(
+    @Param('habId') habId: string,
+    @Param('type') type: string,
+    @Query('page') page: number,
+    @Query('pageSize') pageSize: number,) {
+    return this.postsService.loadHabPosts(Number(habId), type, Number(page), Number(pageSize))
+  }
 }

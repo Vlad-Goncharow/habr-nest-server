@@ -38,16 +38,6 @@ export class HabsController {
   }
 
 
-  //Загрузка постов хаба
-  @ApiOperation({ summary: "Загрузка постов хаба" })
-  @Get('/load/:id/posts')
-  loadHabPosts(@Param('id') id: string,
-    @Query('page') page: number,
-    @Query('pageSize') pageSize: number,){
-    return this.habsService.loadHabPosts(id, page, pageSize)
-  }
-
-
   //Загрузка авторов хаба
   @ApiOperation({ summary: "Загрузка авторов хаба" })
   @Get('/load/:id/authors')
@@ -84,5 +74,13 @@ export class HabsController {
   @Get('/:userId/subscribers')
   async loadUserHabs(@Param('userId') userId: string) {
     return this.habsService.loadUserHabs(Number(userId))
+  }
+
+
+  //Получение хабов по названия
+  @ApiOperation({ summary: "Получение хабов" })
+  @Get('/all/list')
+  async getAllHabs() {
+    return this.habsService.getAllHabs()
   }
 }

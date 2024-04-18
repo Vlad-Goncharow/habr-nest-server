@@ -46,7 +46,6 @@ export class HabsService {
     return hab
   }
 
-
   async loadShortHabById(id:number){
     const hab = await this.habRepository.findByPk(id)
     const posts = await this.habPostsModel.findAndCountAll({
@@ -69,48 +68,26 @@ export class HabsService {
     }
   }
 
-  async loadHabPosts(id: string, page: number, pageSize: number){
-    const offset = (page - 1) * pageSize;
-    const posts = await this.habPostsModel.findAll({
-      where: { habId: id },
-      include: [
-        {
-          model: PostModel,
-          include: [
-            {
-              model: User,
-              attributes: ['id', 'avatar', 'nickname']
-            },
-            {
-              model: Hab,
-              through: { attributes: [] },
-              attributes: ['id', 'title']
-            }
-          ]
-        },
-      ],
-      limit: pageSize,
-      offset: offset,
-    });
-
-    return posts.map(habPost => habPost.post);;
-  }
-
   async loadHabAuthors(id:string, page:number, pageSize:number){
     const offset = (page - 1) * pageSize;
-    const authors = await this.habAuthorsModel.findAll({
+
+    const {count, rows} = await this.habAuthorsModel.findAndCountAll({
       where: { habId: id },
       include: [
         {
           model: User,
-          attributes: ['id', 'avatar', 'nickname','description']
+          attributes: { exclude: ['password'] }
         },
       ],
       limit: pageSize,
       offset: offset,
+      distinct: true,
     });
 
-    return authors.map(habAuthors => habAuthors.user)
+    return {
+      users: rows.map(habAuthors => habAuthors.user),
+      length:count
+    }
   }
 
   async subscribeToHab(dto: SubscribeDto){
@@ -154,7 +131,6 @@ export class HabsService {
     }
   }
 
-  //delete hab author
   async deleteAuthorInHabAuthors(userId: number, habId: number){
     const hab = await this.loadHabById(habId)
     
@@ -170,7 +146,6 @@ export class HabsService {
     // author.destroy()
   }
 
-
   async loadUserHabs(userId:number){
     const data = await this.habSubscribersModel.findAll({
       where:{userId},
@@ -183,6 +158,14 @@ export class HabsService {
     })
 
     const habs = data.map((el) => el.hab)
+
+    return habs
+  }
+
+  async getAllHabs(){
+    const habs = await this.habRepository.findAll({
+      attributes: ['id', 'title'],
+    })
 
     return habs
   }
