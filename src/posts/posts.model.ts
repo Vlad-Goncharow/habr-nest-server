@@ -1,5 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { BelongsTo, BelongsToMany, Column, DataType, ForeignKey, Model, Table } from "sequelize-typescript";
+import { BelongsTo, BelongsToMany, Column, DataType, ForeignKey, HasMany, Model, Table } from "sequelize-typescript";
+import { CommentsModel } from "src/comments/comments.model";
 import { HabPosts } from "src/habs/hab-posts.model";
 import { Hab } from "src/habs/habs.model";
 import { User } from "src/users/users.model";
@@ -52,6 +53,10 @@ export class PostModel extends Model<PostModel, PostCreationAttrs> {
   @ApiProperty({ description: "Хабы поста", type: () => [Hab] })
   @BelongsToMany(() => Hab, () => HabPosts)
   habs: Hab[];
+
+  @ApiProperty({ description: "Коментарии поста", type: () => [CommentsModel] })
+  @HasMany(() => CommentsModel)
+  comments: CommentsModel[];
 
   @ApiProperty({ example: '1', description: 'Ключ юзера' })
   @ForeignKey(() => User)

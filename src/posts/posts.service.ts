@@ -36,7 +36,7 @@ export class PostsService {
     return post
   }
 
-  async loadPostById(postId:string){
+  async loadPostById(postId:number){
     const post = await this.postRepository.findByPk(postId, {
       include:[
         {

@@ -29,7 +29,7 @@ export class PostsController {
   //Получение одного поста
   @ApiOperation({summary:'Получение одного поста'})
   @Get('/:postId')
-  loadPostById(@Param('postId') postId:string){
+  loadPostById(@Param('postId') postId:number){
     return this.postsService.loadPostById(postId)
   }
 

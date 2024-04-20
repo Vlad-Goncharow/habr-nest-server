@@ -19,6 +19,8 @@ import { HabSubscribers } from './habs/hab-subscribers.model';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import * as path from 'path'
 import { UserSubscriptions } from './users/user-subscriptions-model';
+import { CommentsModule } from './comments/comments.module';
+import { CommentsModel } from './comments/comments.model';
 @Module({
   controllers: [],
   providers: [],
@@ -34,7 +36,7 @@ import { UserSubscriptions } from './users/user-subscriptions-model';
       username: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
-      models: [User, Role, UserRoles, UserSubscriptions, RefreshToken, PostModel, Hab, HabPosts, HabAuthors, HabSubscribers],
+      models: [User, Role, UserRoles, UserSubscriptions, RefreshToken, PostModel, Hab, HabPosts, HabAuthors, HabSubscribers, CommentsModel],
       autoLoadModels: true,
     }),
     AuthModule,
@@ -43,6 +45,7 @@ import { UserSubscriptions } from './users/user-subscriptions-model';
     RolesModule,
     PostsModule,
     HabsModule,
+    CommentsModule,
   ],
 })
 export class AppModule {}
