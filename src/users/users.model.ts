@@ -6,6 +6,7 @@ import { PostModel } from "src/posts/posts.model";
 import { Hab } from "src/habs/habs.model";
 import { HabSubscribers } from "src/habs/hab-subscribers.model";
 import { UserSubscriptions } from "./user-subscriptions-model";
+import { CommentsModel } from "src/comments/comments.model";
 
 
 interface UserCreationAttrs {
@@ -70,6 +71,10 @@ export class User extends Model<User, UserCreationAttrs> {
   @ApiProperty({ description: "Посты пользователя", type: () => [PostModel] })
   @HasMany(() => PostModel)
   posts: PostModel[];
+
+  @ApiProperty({ description: "Коментарии пользователя", type: () => [CommentsModel] })
+  @HasMany(() => CommentsModel)
+  comments: CommentsModel[];
 
   @ApiProperty({ description: "Подписки на хабы пользователя", type: () => [HabSubscribers] })
   @BelongsToMany(() => Hab, () => HabSubscribers)

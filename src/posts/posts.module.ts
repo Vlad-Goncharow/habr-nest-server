@@ -10,12 +10,13 @@ import { Hab } from 'src/habs/habs.model';
 import { HabPosts } from 'src/habs/hab-posts.model';
 import { JwtService } from '@nestjs/jwt';
 import { AuthModule } from 'src/auth/auth.module';
+import { CommentsModel } from 'src/comments/comments.model';
 
 @Module({
   controllers: [PostsController],
   providers: [PostsService],
   imports: [
-    SequelizeModule.forFeature([User, PostModel, Hab, HabPosts]),
+    SequelizeModule.forFeature([User, PostModel, Hab, HabPosts, CommentsModel]),
     HabsModule,
     AuthModule,
     FilesModule

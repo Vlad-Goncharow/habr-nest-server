@@ -195,21 +195,23 @@ export class UsersService {
     const user = await this.userRepository.findByPk(userId, {
       include:[
         {
-          model:User,
-          through:{attributes:[]},
-          as:'subscribers',
+          through: { attributes: [] },
+          association: 'roles',
+          attributes: ['id', 'value']
+        },
+        {
+          through: { attributes: [] },
+          association:'subscribers',
           attributes:['id']
         },
         {
-          model: User,
           through: { attributes: [] },
-          as: 'subscriptions',
+          association: 'subscriptions',
           attributes: ['id']
         },
         {
-          model: Hab,
           through: { attributes: [] },
-          as: 'habSubscribers',
+          association: 'habSubscribers',
           attributes: ['id']
         }
       ]
