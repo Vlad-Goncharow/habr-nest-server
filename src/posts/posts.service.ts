@@ -9,6 +9,7 @@ import { User } from 'src/users/users.model';
 import { FilesService } from 'src/files/files.service';
 import { Op } from 'sequelize';
 import { HabPosts } from 'src/habs/hab-posts.model';
+import { CommentsModel } from 'src/comments/comments.model';
 
 @Injectable()
 export class PostsService {
@@ -72,16 +73,16 @@ export class PostsService {
   async loadPosts(category: string, type: string, page: number, pageSize){
     const offset = (page - 1) * pageSize;
 
-    const { count } = await this.postRepository.findAndCountAll({
-      where: { category, type },
-    });
-
-    const postsWithInclude = await this.postRepository.findAll({
+    const { count, rows } = await this.postRepository.findAndCountAll({
       where: { category, type },
       include: [
         {
           model: User,
           attributes: ['id', 'avatar', 'nickname']
+        },
+        {
+          model: CommentsModel,
+          attributes: ['id',]
         },
         {
           model: Hab,
@@ -91,9 +92,11 @@ export class PostsService {
       ],
       limit: pageSize,
       offset: offset,
+      distinct: true,
     });
+    
     return {
-      posts: postsWithInclude,
+      posts: rows,
       length:count
     };
   }
