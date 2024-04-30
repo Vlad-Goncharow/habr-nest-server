@@ -18,7 +18,7 @@ export class AuthService {
     const candidateNickname = await this.userService.getUserByNickname(userDto.nickname)
 
     if (candidateEmail || candidateNickname){
-      throw new HttpException('Данная почта или ник заняты', HttpStatus.BAD_REQUEST)
+      throw new HttpException({ message: 'Данная почта или ник заняты', param:['email','nickname']}, HttpStatus.BAD_REQUEST)
     }
 
     const hashPassword = await bcrypt.hash(userDto.password, 5)
@@ -39,12 +39,12 @@ export class AuthService {
     const userEmail = await this.userService.getUserByEmail(userDto.email)
 
     if (!userEmail) {
-      throw new HttpException('Данная почта не зарегистрирована', HttpStatus.BAD_REQUEST)
+      throw new HttpException({ message: 'Данная почта не зарегистрирована', param:'email'}, HttpStatus.BAD_REQUEST)
     }
 
     const checkPass = await bcrypt.compare(userDto.password, userEmail.password)
     if (!checkPass) {
-      throw new HttpException({message:"Неверный пароль",error:[{param:'password'}]}, HttpStatus.BAD_REQUEST)
+      throw new HttpException({message:"Неверный пароль",param:'password'}, HttpStatus.BAD_REQUEST)
     }
 
     const user = await this.userService.loadCurrentUserById(userEmail.id)

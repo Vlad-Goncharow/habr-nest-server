@@ -15,13 +15,11 @@ import { CommentsModel } from 'src/comments/comments.model';
 export class PostsService {
 
   constructor(@InjectModel(PostModel) private postRepository: typeof PostModel,
-                                      private habsService:HabsService,
-                                      private fileService: FilesService){}
+                                      private habsService:HabsService){}
 
-  async create(dto: CreatePostDto, image:any) {
+  async create(dto: CreatePostDto) {
     //create post & get habs by ids
-    const fileName = await this.fileService.createFile(image)
-    const post = await this.postRepository.create({ ...dto, image:fileName });
+    const post = await this.postRepository.create({ ...dto});
     const habs = await this.habsService.getHabs(dto.habs);
 
     //add habs in post
