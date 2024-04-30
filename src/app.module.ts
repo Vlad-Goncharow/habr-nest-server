@@ -21,13 +21,14 @@ import * as path from 'path'
 import { UserSubscriptions } from './users/user-subscriptions-model';
 import { CommentsModule } from './comments/comments.module';
 import { CommentsModel } from './comments/comments.model';
+import { FilesModule } from './files/files.module';
 @Module({
   controllers: [],
   providers: [],
   imports: [
     ConfigModule.forRoot({envFilePath:`.env.${process.env.NODE_ENV}`}),
     ServeStaticModule.forRoot({
-      rootPath: path.resolve(__dirname, 'static')
+      rootPath: path.join(__dirname, "../uploads")
     }),
     SequelizeModule.forRoot({
       dialect: 'postgres',
@@ -39,6 +40,7 @@ import { CommentsModel } from './comments/comments.model';
       models: [User, Role, UserRoles, UserSubscriptions, RefreshToken, PostModel, Hab, HabPosts, HabAuthors, HabSubscribers, CommentsModel],
       autoLoadModels: true,
     }),
+    FilesModule,
     AuthModule,
     RefreshTokensModule,
     UsersModule,

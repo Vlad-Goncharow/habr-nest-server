@@ -1,13 +1,10 @@
-import { Body, Controller, Get, Param, Post, Query, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
-import { CreatePostDto } from './dto/create-post.dto';
-import { PostsService } from './posts.service';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { PostModel } from './posts.model';
+import { Body, Controller, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { User } from 'src/users/users.model';
-import { FileInterceptor } from '@nestjs/platform-express';
 import { Roles } from 'src/auth/roles-auth.decorator';
 import { RolesGuard } from 'src/auth/roles.guard';
+import { CreatePostDto } from './dto/create-post.dto';
+import { PostsService } from './posts.service';
 
 @ApiTags('Посты')
 @Controller('posts')
@@ -19,10 +16,9 @@ export class PostsController {
   @ApiOperation({ summary: "Создание поста" })
   @UseGuards(JwtAuthGuard)
   @Post()
-  @UseInterceptors(FileInterceptor('image'))
-  create(@Req() req, @Body() createPostDto: CreatePostDto, @UploadedFile() image) {
+  create(@Req() req, @Body() createPostDto: CreatePostDto, ) {
     const {id} = req.user
-    return this.postsService.create({ ...createPostDto, userId:id }, image);
+    return this.postsService.create({ ...createPostDto, userId:id });
   }
 
 

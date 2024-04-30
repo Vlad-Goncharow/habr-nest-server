@@ -1,16 +1,14 @@
-import { Module} from '@nestjs/common';
-import { PostsService } from './posts.service';
-import { PostsController } from './posts.controller';
-import { User } from 'src/users/users.model';
+import { Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
-import { FilesModule } from 'src/files/files.module';
-import { PostModel } from './posts.model';
-import { HabsModule } from 'src/habs/habs.module';
-import { Hab } from 'src/habs/habs.model';
-import { HabPosts } from 'src/habs/hab-posts.model';
-import { JwtService } from '@nestjs/jwt';
 import { AuthModule } from 'src/auth/auth.module';
 import { CommentsModel } from 'src/comments/comments.model';
+import { HabPosts } from 'src/habs/hab-posts.model';
+import { Hab } from 'src/habs/habs.model';
+import { HabsModule } from 'src/habs/habs.module';
+import { User } from 'src/users/users.model';
+import { PostsController } from './posts.controller';
+import { PostModel } from './posts.model';
+import { PostsService } from './posts.service';
 
 @Module({
   controllers: [PostsController],
@@ -19,7 +17,6 @@ import { CommentsModel } from 'src/comments/comments.model';
     SequelizeModule.forFeature([User, PostModel, Hab, HabPosts, CommentsModel]),
     HabsModule,
     AuthModule,
-    FilesModule
   ],
   exports:[
     PostsService
