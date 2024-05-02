@@ -5,6 +5,7 @@ import { UsersService } from 'src/users/users.service';
 import * as bcrypt from 'bcryptjs'
 import { User } from 'src/users/users.model';
 import { RefreshTokensService } from 'src/refresh-tokens/refresh-tokens.service';
+import { UpdateProfileDto } from './dto/UpdateProfileDto';
 
 @Injectable()
 export class AuthService {
@@ -89,6 +90,13 @@ export class AuthService {
 
   async logout(id:number){
     return await this.refreshTokenServie.deleteToken(id)
+  }
+
+  async profileUpdate(id: number, dto: UpdateProfileDto){
+    const data = await this.userService.updateProfile(id, dto)
+    const user = await this.userService.loadCurrentUserById(data[0])
+    
+    return user
   }
 
   private generateToken(user:User){
