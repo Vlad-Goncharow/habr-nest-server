@@ -8,6 +8,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './users.model';
 import { UserSubscriptions } from './user-subscriptions-model';
 import { PostsService } from 'src/posts/posts.service';
+import { UpdateProfileDto } from 'src/auth/dto/UpdateProfileDto';
 
 @Injectable()
 export class UsersService {
@@ -35,6 +36,11 @@ export class UsersService {
     });
 
     return userWithoutPassword;
+  }
+
+  //update profile
+  async updateProfile(id: number, dto: UpdateProfileDto){
+    return this.userRepository.update(dto,{where:{id}})
   }
 
   //add user new role

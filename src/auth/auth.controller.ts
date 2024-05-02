@@ -1,9 +1,10 @@
-import { Body, Controller, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, Put, Req, Res, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import { UpdateProfileDto } from './dto/UpdateProfileDto';
 
 @ApiTags('Авторизация')
 @Controller('auth')
@@ -68,8 +69,8 @@ export class AuthController {
     })
   }
 
-  //Обновление токена
-  @ApiOperation({ summary: "Обновление токена" })
+  //Выход
+  @ApiOperation({ summary: "Выход" })
   @UseGuards(JwtAuthGuard)
   @Post('/logout')
   async logout(@Req() req, @Res() res: Response) {
@@ -78,6 +79,18 @@ export class AuthController {
     const userData = await this.authService.logout(id)
     
     res.clearCookie("refreshToken");
+    res.json(userData)
+  }
+
+  //Обновление профиля
+  @ApiOperation({ summary: "Обновление профиля" })
+  @UseGuards(JwtAuthGuard)
+  @Put('/profile-update')
+  async profileUpdate(@Req() req, @Body() dto: UpdateProfileDto, @Res() res: Response) {
+    const { id } = req.user
+
+    const userData = await this.authService.profileUpdate(id, dto)
+
     res.json(userData)
   }
 }
