@@ -29,6 +29,19 @@ export class HabsController {
     return this.habsService.loadHabById(Number(id))
   }
 
+  
+  //Пойск хаба
+  @ApiOperation({ summary: "Пойск хаба" })
+  @Get('/search/category/:category/:title')
+  loadHabsByValues(
+    @Param('category') category: string,
+    @Param('title') title: string,
+    @Query('page') page: number,
+    @Query('pageSize') pageSize: number,
+  ) {
+    return this.habsService.loadHabsByValues(category, title, page, pageSize)
+  }
+
 
   //Загрузка короткой информации о хабе
   @ApiOperation({ summary: "Загрузка короткой информации о хабе" })
@@ -77,7 +90,7 @@ export class HabsController {
   }
 
 
-  //Получение хабов по названия
+  //Получение хабов по названию
   @ApiOperation({ summary: "Получение хабов" })
   @Get('/all/list')
   async getAllHabs() {

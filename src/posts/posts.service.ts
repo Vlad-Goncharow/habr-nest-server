@@ -71,8 +71,10 @@ export class PostsService {
   async loadPosts(category: string, type: string, page: number, pageSize){
     const offset = (page - 1) * pageSize;
 
+    const myWhere = category === 'all' ? {type} : {category, type}
+    
     const { count, rows } = await this.postRepository.findAndCountAll({
-      where: { category, type },
+      where: myWhere,
       include: [
         {
           model: User,

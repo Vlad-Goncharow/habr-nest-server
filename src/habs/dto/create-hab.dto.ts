@@ -13,4 +13,8 @@ export class CreateHabDto {
   @ApiProperty({ example: 'example', description: 'Описание хаба' })
   @IsString({ message: 'Должно быть строкой' })
   readonly description:string
+
+  @ApiProperty({ example: 'develop', description: 'Категория Хаба' })
+  @IsString({ message: 'Должно быть строкой' })
+  readonly category:string
 }

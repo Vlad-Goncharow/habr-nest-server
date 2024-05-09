@@ -8,6 +8,8 @@ import { HabPosts } from './hab-posts.model';
 import { HabAuthors } from './hab-authors.model';
 import { SubscribeDto } from './dto/subscribe-hab.dto';
 import { HabSubscribers } from './hab-subscribers.model';
+import { Op, Sequelize } from 'sequelize';
+import sequelize from 'sequelize';
 
 
 @Injectable()
@@ -44,6 +46,57 @@ export class HabsService {
     const hab = await this.habRepository.findByPk(Number(id))
 
     return hab
+  }
+
+  async loadHabsByValues(category: string, title:string, page:number, pageSize:number){
+    const offset = (page - 1) * pageSize;
+
+    const myWhere = () => {
+      if(category === 'all'){
+        if(title === 'all'){
+          return {};
+        } else{
+          return {
+            title: { [Op.like]: `%${title}%` } 
+          }
+        }
+      } else{
+        if(title === 'all'){
+          return {
+            category
+          }
+        } else {
+          return {
+            category, 
+            title: { [Op.like]: `%${title}%`} 
+          }
+        }
+      }
+    }
+
+    const { rows, count } = await this.habRepository.findAndCountAll({
+      where: myWhere(),
+      attributes: {
+        include: [
+          [
+            sequelize.literal('(SELECT COUNT(*) FROM "hab_subscribers" WHERE "hab_subscribers"."habId" = "Hab"."id")'),
+            'usersSubscribersCount',
+          ],
+          
+        ],
+        
+      },
+      order: [
+        ['usersSubscribersCount', 'DESC']
+      ],
+      limit: pageSize,
+      offset: offset,
+    })
+
+    return {
+      habs: rows,
+      length: count
+    };
   }
 
   async loadShortHabById(id:number){
