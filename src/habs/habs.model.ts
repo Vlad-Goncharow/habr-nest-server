@@ -23,6 +23,10 @@ export class Hab extends Model<Hab, HabCreationAttrs> {
   @Column({ type: DataType.STRING, unique: true, allowNull: false })
   title: string;
 
+  @ApiProperty({ example: 'develop', description: 'Категория Хаба' })
+  @Column({ type: DataType.STRING, defaultValue: 'develop', allowNull: false })
+  category: string;
+
   @ApiProperty({ example: 'example.jpg', description: 'Картинка хаба' })
   @Column({ type: DataType.STRING, allowNull: false })
   image: string;
