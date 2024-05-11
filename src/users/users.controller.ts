@@ -69,4 +69,17 @@ export class UsersController {
   ) {
     return this.usersService.loadUserSubs(Number(userId), type, Number(page), Number(pageSize))
   }
+
+
+  //Загрузка авторов категории
+  @ApiOperation({ summary: "Загрузка авторов категории" })
+  @Get('/authors/:category')
+  loadCategoryAuthors
+    (
+      @Param('category') category: string,
+      @Query('page') page: number,
+      @Query('pageSize') pageSize: number,
+    ) {
+    return this.usersService.loadCategoryAuthors(category, page, pageSize)
+  }
 }
