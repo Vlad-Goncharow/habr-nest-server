@@ -30,16 +30,19 @@ export class HabsController {
   }
 
   
+  
   //Пойск хаба
   @ApiOperation({ summary: "Пойск хаба" })
-  @Get('/search/category/:category/:title')
+  @Get('/search/:category/:title')
   loadHabsByValues(
     @Param('category') category: string,
     @Param('title') title: string,
     @Query('page') page: number,
     @Query('pageSize') pageSize: number,
+    @Query('sort') sort: string,
+    @Query('order') order: string,
   ) {
-    return this.habsService.loadHabsByValues(category, title, page, pageSize)
+    return this.habsService.loadHabsByValues(category, title, sort, order, page, pageSize)
   }
 
 
