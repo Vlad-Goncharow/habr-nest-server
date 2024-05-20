@@ -48,7 +48,7 @@ export class HabsService {
     return hab
   }
 
-  async loadHabsByValues(category: string, title:string, page:number, pageSize:number){
+  async loadHabsByValues(category: string, title:string, sort:string, order:string, page:number, pageSize:number){
     const offset = (page - 1) * pageSize;
 
     const myWhere = () => {
@@ -73,6 +73,14 @@ export class HabsService {
         }
       }
     }
+    let myOrder = [];
+    
+    if(sort === 'subs' || sort === 'rating' && order === 'asc' || order === 'desc'){
+      myOrder = [[
+        sort === 'subs' ? 'usersSubscribersCount' : 'rating',
+        order.toUpperCase()
+      ]]
+    }
 
     const { rows, count } = await this.habRepository.findAndCountAll({
       where: myWhere(),
@@ -82,13 +90,9 @@ export class HabsService {
             sequelize.literal('(SELECT COUNT(*) FROM "hab_subscribers" WHERE "hab_subscribers"."habId" = "Hab"."id")'),
             'usersSubscribersCount',
           ],
-          
         ],
-        
       },
-      order: [
-        ['usersSubscribersCount', 'DESC']
-      ],
+      order: myOrder,
       limit: pageSize,
       offset: offset,
     })
