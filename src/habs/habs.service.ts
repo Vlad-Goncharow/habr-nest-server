@@ -103,6 +103,39 @@ export class HabsService {
     };
   }
 
+  async searchHabs(title, page, pageSize,sort, order){
+    const offset = (page - 1) * pageSize;
+
+    let myOrder = [];
+
+    if (sort === 'subs' || sort === 'rating' && order === 'asc' || order === 'desc') {
+      myOrder = [[
+        sort === 'subs' ? 'usersSubscribersCount' : 'rating',
+        order.toUpperCase()
+      ]]
+    }
+
+    const {rows, count} = await this.habRepository.findAndCountAll({
+      where: { title: { [Op.like]: `%${title}%` } },
+      attributes: {
+        include: [
+          [
+            sequelize.literal('(SELECT COUNT(*) FROM "hab_subscribers" WHERE "hab_subscribers"."habId" = "Hab"."id")'),
+            'usersSubscribersCount',
+          ],
+        ],
+      },
+      order: myOrder,
+      limit: pageSize,
+      offset: offset,
+    })
+
+    return {
+      habs: rows,
+      length: count
+    };
+  }
+
   async loadShortHabById(id:number){
     const hab = await this.habRepository.findByPk(id)
     const posts = await this.habPostsModel.findAndCountAll({
