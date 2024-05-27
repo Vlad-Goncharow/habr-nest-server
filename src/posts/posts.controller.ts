@@ -30,6 +30,17 @@ export class PostsController {
   }
 
 
+  //Пойск постов по названия
+  @ApiOperation({ summary: 'Пойск постов по названия' })
+  @Get('/search/:title')
+  seachPosts(
+    @Param('title') title: string,
+    @Query('page') page: number,
+    @Query('pageSize') pageSize: number,) {
+    return this.postsService.seachPosts(title, Number(page), Number(pageSize))
+  }
+
+
   //Получение постов
   @ApiOperation({ summary: 'Получение постов' })
   @Get('/:category/:type')

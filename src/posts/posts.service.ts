@@ -202,4 +202,35 @@ export class PostsService {
       length: count
     };
   }
+
+  async seachPosts(title:string, page:number, pageSize:number){
+    const offset = (page - 1) * pageSize;
+    
+    const { count, rows } = await this.postRepository.findAndCountAll({
+      where: { title: { [Op.like]: `%${title}%` } },
+      include: [
+        {
+          model: User,
+          attributes: ['id', 'avatar', 'nickname']
+        },
+        {
+          model: CommentsModel,
+          attributes: ['id',]
+        },
+        {
+          model: Hab,
+          through: { attributes: [] },
+          attributes: ['id', 'title']
+        },
+      ],
+      limit: pageSize,
+      offset: offset,
+      distinct: true,
+    });
+
+    return {
+      posts: rows,
+      length: count
+    };
+  }
 }

@@ -9,7 +9,7 @@ import { User } from './users.model';
 import { UserSubscriptions } from './user-subscriptions-model';
 import { PostsService } from 'src/posts/posts.service';
 import { UpdateProfileDto } from 'src/auth/dto/UpdateProfileDto';
-import sequelize from 'sequelize';
+import sequelize, { Op } from 'sequelize';
 
 @Injectable()
 export class UsersService {
@@ -231,25 +231,22 @@ export class UsersService {
     return user
   }
 
-  async loadCategoryAuthors(category:string, page, pageSize){
+  async loadCategoryAuthors(nickname:string, category:string, page:number, pageSize:number){
     const offset = (page - 1) * pageSize;
 
     const myWhere = category === 'all' ? {} : {category}
+    const userWHre = nickname === 'all' ? {} : {nickname:{ [Op.like]: `%${nickname}%` }}
 
     const {count,rows} = await this.userRepository.findAndCountAll({
+      where: userWHre,
       include: [
         {
           model: PostModel,
           where: myWhere,
-          attributes:[]
+          attributes:[],
         }
       ],
-      attributes: [
-        'id',
-        'nickname',
-        'avatar',
-        'description'
-      ], 
+      attributes: { exclude: ['password'] },
       limit: pageSize,
       offset: offset,
       distinct:true,

@@ -73,13 +73,14 @@ export class UsersController {
 
   //Загрузка авторов категории
   @ApiOperation({ summary: "Загрузка авторов категории" })
-  @Get('/authors/:category')
+  @Get('/authors/:category/:nickname')
   loadCategoryAuthors
     (
+      @Param('nickname') nickname: string,
       @Param('category') category: string,
       @Query('page') page: number,
       @Query('pageSize') pageSize: number,
     ) {
-    return this.usersService.loadCategoryAuthors(category, page, pageSize)
+    return this.usersService.loadCategoryAuthors(nickname, category, page, pageSize)
   }
 }
