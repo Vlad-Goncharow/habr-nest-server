@@ -98,7 +98,7 @@ export class UsersService {
         {
           model: Hab,
           through: { attributes: [] },
-          attributes: ['id', 'title']
+          attributes: ['id']
         }
       ]
     })
