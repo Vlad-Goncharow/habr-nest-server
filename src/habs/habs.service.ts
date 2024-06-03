@@ -136,28 +136,6 @@ export class HabsService {
     };
   }
 
-  async loadShortHabById(id:number){
-    const hab = await this.habRepository.findByPk(id)
-    const posts = await this.habPostsModel.findAndCountAll({
-      where: { habId: id },
-      include: [{all:true},]
-    })
-    const authors = await this.habRepository.findOne({
-      where: { id },
-      include: [
-        {
-          model: User,
-          as: 'usersSubscribers',
-        },
-      ]
-    })
-    return {
-      hab,
-      posts: posts.count,
-      subscribers: authors.usersSubscribers.length
-    }
-  }
-
   async loadHabAuthors(id:string, page:number, pageSize:number){
     const offset = (page - 1) * pageSize;
 
@@ -242,14 +220,28 @@ export class HabsService {
       include:[
         {
           model: Hab,
-          attributes: ['id', 'title']
         }
       ]
     })
 
     const habs = data.map((el) => el.hab)
 
-    return habs
+    const details = await Promise.all(habs.map(async (hab) => {
+      const postsCount = await this.habPostsModel.count({
+        where: { habId: hab.id },
+      });
+
+      const subscribersCount = await this.habSubscribersModel.count({
+        where: { habId: hab.id },
+      });
+      return {
+        hab,
+        posts: postsCount,
+        subscribers: subscribersCount
+      }
+    }))
+
+    return details
   }
 
   async getAllHabs(){

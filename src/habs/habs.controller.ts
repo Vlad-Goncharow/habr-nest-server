@@ -60,14 +60,6 @@ export class HabsController {
   }
 
 
-  //Загрузка короткой информации о хабе
-  @ApiOperation({ summary: "Загрузка короткой информации о хабе" })
-  @Get('/short/:id')
-  loadShortHabById(@Param('id') id: string) {
-    return this.habsService.loadShortHabById(Number(id))
-  }
-
-
   //Загрузка авторов хаба
   @ApiOperation({ summary: "Загрузка авторов хаба" })
   @Get('/load/:id/authors')
@@ -101,7 +93,7 @@ export class HabsController {
 
   //Получение хабов пользователя на которые он подписан
   @ApiOperation({ summary: "Получение хабов пользователя на которые он подписан" })
-  @Get('/:userId/subscribers')
+  @Get('/user/:userId/subscribed-habs')
   async loadUserHabs(@Param('userId') userId: string) {
     return this.habsService.loadUserHabs(Number(userId))
   }
