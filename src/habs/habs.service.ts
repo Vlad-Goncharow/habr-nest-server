@@ -215,38 +215,60 @@ export class HabsService {
   }
 
   async loadUserHabs(userId:number){
-    const data = await this.habSubscribersModel.findAll({
-      where:{userId},
-      include:[
+    const data = await this.habRepository.findAll({
+      include: [
         {
-          model: Hab,
-        }
-      ]
+          model: User,
+          as: 'authors',
+          where: { id: userId },
+          attributes: [],
+        },
+      ],
+      attributes: {
+        include: [
+          [
+            sequelize.literal('(SELECT COUNT(*) FROM "hab_subscribers" WHERE "hab_subscribers"."habId" = "Hab"."id")'),
+            'subscribersCount',
+          ], [
+            sequelize.literal('(SELECT COUNT(*) FROM "hab_posts" WHERE "hab_posts"."habId" = "Hab"."id")'),
+            'postsCount',
+          ], [
+            sequelize.literal('(SELECT COUNT(*) FROM "hab_authors" WHERE "hab_authors"."habId" = "Hab"."id")'),
+            'authorsCount',
+          ],
+        ],
+      },
     })
 
-    const habs = data.map((el) => el.hab)
-
-    const details = await Promise.all(habs.map(async (hab) => {
-      const postsCount = await this.habPostsModel.count({
-        where: { habId: hab.id },
-      });
-
-      const subscribersCount = await this.habSubscribersModel.count({
-        where: { habId: hab.id },
-      });
-      return {
-        hab,
-        posts: postsCount,
-        subscribers: subscribersCount
-      }
-    }))
-
-    return details
+    return data
   }
 
   async getAllHabs(){
     const habs = await this.habRepository.findAll({
       attributes: ['id', 'title'],
+    })
+
+    return habs
+  }
+
+  async loadHabsByCategory(category:string){
+    const habs = await this.habRepository.findAll({
+      where:{category},
+      attributes: {
+        include: [
+          [
+            sequelize.literal('(SELECT COUNT(*) FROM "hab_subscribers" WHERE "hab_subscribers"."habId" = "Hab"."id")'),
+            'subscribersCount',
+          ], [
+            sequelize.literal('(SELECT COUNT(*) FROM "hab_posts" WHERE "hab_posts"."habId" = "Hab"."id")'),
+            'postsCount',
+          ], [
+            sequelize.literal('(SELECT COUNT(*) FROM "hab_authors" WHERE "hab_authors"."habId" = "Hab"."id")'),
+            'authorsCount',
+          ],
+        ],
+      },
+      limit: 10,
     })
 
     return habs

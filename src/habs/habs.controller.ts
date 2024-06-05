@@ -105,4 +105,12 @@ export class HabsController {
   async getAllHabs() {
     return this.habsService.getAllHabs()
   }
+
+
+  //Получение хабов на главной по категории
+  @ApiOperation({ summary: "Получение хабов на главной по категории" })
+  @Get('/category/:category')
+  async loadHabsByCategory(@Param('category') category: string) {
+    return this.habsService.loadHabsByCategory(category)
+  }
 }
