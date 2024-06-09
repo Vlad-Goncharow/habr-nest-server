@@ -10,7 +10,14 @@ import { PostsService } from './posts.service';
 @Controller('posts')
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
-
+  //Популярные посты за неделю
+  @ApiOperation({ summary: 'Популярные посты за неделю' })
+  @Get('/weekly/:category')
+  loadWeeklyPosts(
+    @Param('category') category: string,
+  ) {
+    return this.postsService.loadWeeklyPosts(category)
+  }
   
   //Создание поста
   @ApiOperation({ summary: "Создание поста" })
@@ -85,4 +92,7 @@ export class PostsController {
     @Query('pageSize') pageSize: number,) {
     return this.postsService.loadHabPosts(Number(habId), type, Number(page), Number(pageSize))
   }
+
+
+  
 }

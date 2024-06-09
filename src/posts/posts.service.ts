@@ -7,9 +7,10 @@ import { HabsService } from 'src/habs/habs.service';
 import { Hab } from 'src/habs/habs.model';
 import { User } from 'src/users/users.model';
 import { FilesService } from 'src/files/files.service';
-import { Op } from 'sequelize';
+import { Op, Sequelize } from 'sequelize';
 import { HabPosts } from 'src/habs/hab-posts.model';
 import { CommentsModel } from 'src/comments/comments.model';
+import sequelize from 'sequelize';
 
 @Injectable()
 export class PostsService {
@@ -232,5 +233,29 @@ export class PostsService {
       posts: rows,
       length: count
     };
+  }
+
+  async loadWeeklyPosts(category:string){
+    const whereCategory = category !== 'all' ? { category } : {}
+
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 70);
+
+    const posts = await this.postRepository.findAll({
+      where: [
+        whereCategory,
+        {
+          createdAt: {
+            [Op.gte]: oneWeekAgo
+          }
+        }
+      ],
+      order:[
+        ['views','desc']
+      ],
+      limit:6
+    })
+
+    return posts
   }
 }
