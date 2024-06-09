@@ -26,4 +26,8 @@ export class CommentsModel extends Model<CommentsModel> {
   @ApiProperty({ description: "Автор поста", type: () => [User] })
   @BelongsTo(() => User)
   author: User
+
+  @ApiProperty({ description: "Пост в котором оставлен коментарий", type: () => [PostModel] })
+  @BelongsTo(() => PostModel)
+  post: PostModel
 }

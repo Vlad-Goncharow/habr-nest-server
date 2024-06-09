@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateCommentDto } from './dto/create-comment.dto';
@@ -46,5 +46,16 @@ export class CommentsController {
   ) {
     const { id } = req.user
     return this.commentsService.deleteComments(Number(commentdId), id);
+  }
+
+
+  //Удаление коментария
+  @ApiOperation({ summary: "Удаление коментария" })
+  @Get('/user/:userId')
+  async loadUserComments(
+    @Param('userId') userId: string,
+    @Query('page') page: number,
+    @Query('pageSize') pageSize: number,   ) {
+    return this.commentsService.loadUserComments(Number(userId), page, pageSize);
   }
 }

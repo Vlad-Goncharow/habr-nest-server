@@ -14,8 +14,8 @@ export class HabsController {
 
   //Создание хаба
   @ApiOperation({ summary: "Создание хаба" })
-  @Roles('ADMIN')
-  @UseGuards(RolesGuard)
+  // @Roles('ADMIN')
+  // @UseGuards(RolesGuard)
   @Post()
   create(@Body() createHabDto: CreateHabDto) {
     return this.habsService.createHab(createHabDto);

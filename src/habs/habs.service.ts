@@ -214,34 +214,37 @@ export class HabsService {
     // author.destroy()
   }
 
-  async loadUserHabs(userId:number){
+  async loadUserHabs(userId: number) {
     const data = await this.habRepository.findAll({
       include: [
         {
           model: User,
-          as: 'authors',
-          where: { id: userId },
-          attributes: [],
-        },
+          as:"usersSubscribers",
+          where: { id:userId },
+          attributes: []
+        }
       ],
       attributes: {
         include: [
           [
             sequelize.literal('(SELECT COUNT(*) FROM "hab_subscribers" WHERE "hab_subscribers"."habId" = "Hab"."id")'),
-            'subscribersCount',
-          ], [
-            sequelize.literal('(SELECT COUNT(*) FROM "hab_posts" WHERE "hab_posts"."habId" = "Hab"."id")'),
-            'postsCount',
-          ], [
-            sequelize.literal('(SELECT COUNT(*) FROM "hab_authors" WHERE "hab_authors"."habId" = "Hab"."id")'),
-            'authorsCount',
+            'subscribersCount'
           ],
-        ],
-      },
-    })
+          [
+            sequelize.literal('(SELECT COUNT(*) FROM "hab_posts" WHERE "hab_posts"."habId" = "Hab"."id")'),
+            'postsCount'
+          ],
+          [
+            sequelize.literal('(SELECT COUNT(*) FROM "hab_authors" WHERE "hab_authors"."habId" = "Hab"."id")'),
+            'authorsCount'
+          ]
+        ]
+      }
+    });
 
-    return data
+    return data;
   }
+
 
   async getAllHabs(){
     const habs = await this.habRepository.findAll({

@@ -15,8 +15,6 @@ export class HabSubscribers extends Model<HabSubscribers> {
   @Column({ type: DataType.INTEGER })
   userId: number;
 
-  // Дополнительные поля, например, дата подписки, статус и т. д.
-
   @BelongsTo(() => Hab)
   hab: Hab;
 
