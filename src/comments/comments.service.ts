@@ -4,6 +4,7 @@ import { InjectModel } from '@nestjs/sequelize';
 import { CommentsModel } from './comments.model';
 import { PostsService } from 'src/posts/posts.service';
 import { User } from 'src/users/users.model';
+import { PostModel } from 'src/posts/posts.model';
 
 @Injectable()
 export class CommentsService {
@@ -54,6 +55,31 @@ export class CommentsService {
       }
     } else{
       throw new HttpException('Такой коментарий не найден', HttpStatus.NOT_FOUND)
+    }
+  }
+
+  async loadUserComments(userId:number, page:number, pageSize:number) {
+    const offset = (page - 1) * pageSize;
+
+    const {rows,count} = await this.commentsRepository.findAndCountAll({
+      where:{userId},
+      include:[
+        {
+          model:User,
+          attributes: ['id', 'avatar', 'nickname'], 
+        },
+        {
+          model: PostModel,
+          attributes: ['id', 'title'],
+        }
+      ],
+      limit: pageSize,
+      offset: offset,
+    })
+    
+    return {
+      comments:rows,
+      length:count
     }
   }
 }
