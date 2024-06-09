@@ -15,6 +15,7 @@ export class CommentsService {
     const data = await this.commentsRepository.create({ ...CreateCommentDto, userId, postId })
     const post = await this.postService.loadPostById(Number(postId))
     await post.$add('comments', data)
+    await post. increment('commentsCount', {by:1})
 
     const comment = await this.commentsRepository.findByPk(data.id, {
       include: [
