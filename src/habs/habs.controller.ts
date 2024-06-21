@@ -12,27 +12,26 @@ import { HabsService } from './habs.service';
 export class HabsController {
   constructor(private readonly habsService: HabsService) {}
 
-  //Создание хаба
-  @ApiOperation({ summary: "Создание хаба" })
-  // @Roles('ADMIN')
-  // @UseGuards(RolesGuard)
+  //create hab
+  @ApiOperation({ summary: "create hab" })
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
   @Post()
   create(@Body() createHabDto: CreateHabDto) {
     return this.habsService.createHab(createHabDto);
   }
 
 
-  //Загрузка хаба
-  @ApiOperation({ summary: "Загрузка хаба" })
+  //load single hab data
+  @ApiOperation({ summary: "load single hab data" })
   @Get('/:id')
   loadHabById(@Param('id') id: string){
     return this.habsService.loadHabById(Number(id))
   }
 
   
-  
-  //Пойск хаба по категории
-  @ApiOperation({ summary: "Пойск хаба по категории" })
+  //load habs by category | title, main page, search page
+  @ApiOperation({ summary: "load habs by category | title, main page, search page" })
   @Get('/search/:category/:title')
   loadHabsByValues(
     @Param('category') category: string,
@@ -46,22 +45,8 @@ export class HabsController {
   }
 
 
-  //Пойск хаба
-  @ApiOperation({ summary: "Пойск хаба" })
-  @Get('/search/:title')
-  searchHabs(
-    @Param('title') title: string,
-    @Query('page') page: number,
-    @Query('pageSize') pageSize: number,
-    @Query('sort') sort: string,
-    @Query('order') order: string,
-  ) {
-    return this.habsService.searchHabs(title, page, pageSize, sort, order)
-  }
-
-
-  //Загрузка авторов хаба
-  @ApiOperation({ summary: "Загрузка авторов хаба" })
+  //load hab authors
+  @ApiOperation({ summary: "load hab authors" })
   @Get('/load/:id/authors')
   loadHabAuthors
   (
@@ -73,8 +58,8 @@ export class HabsController {
   }
 
 
-  //Подписка на хаб
-  @ApiOperation({ summary: "Подписка на хаб" })
+  //subscribe hab
+  @ApiOperation({ summary: "subscribe hab" })
   @UseGuards(JwtAuthGuard)
   @Post('subscribe')
   async subscribeToHab(@Body() subscribeDto: SubscribeDto){
@@ -82,8 +67,8 @@ export class HabsController {
   }
 
 
-  //Отписка с хаба
-  @ApiOperation({ summary: "Отписка с хаба" })
+  //unsubscribe hab
+  @ApiOperation({ summary: "unsubscribe hab" })
   @UseGuards(JwtAuthGuard)
   @Post('unsubscribe')
   async unSubscribeToHab(@Body() subscribeDto: SubscribeDto) {
@@ -91,24 +76,24 @@ export class HabsController {
   }
 
 
-  //Получение хабов пользователя на которые он подписан
-  @ApiOperation({ summary: "Получение хабов пользователя на которые он подписан" })
+  //load hubs subscribed to by the user
+  @ApiOperation({ summary: "load hubs subscribed to by the user" })
   @Get('/user/:userId/subscribed-habs')
   async loadUserHabs(@Param('userId') userId: string) {
     return this.habsService.loadUserHabs(Number(userId))
   }
 
 
-  //Получение хабов по названию
-  @ApiOperation({ summary: "Получение хабов" })
+  //load the full list of hubs, to create a post
+  @ApiOperation({ summary: "load the full list of hubs, to create a post" })
   @Get('/all/list')
   async getAllHabs() {
     return this.habsService.getAllHabs()
   }
 
 
-  //Получение хабов на главной по категории
-  @ApiOperation({ summary: "Получение хабов на главной по категории" })
+  //load habs by category for sidebar
+  @ApiOperation({ summary: "load habs by category for sidebar" })
   @Get('/category/:category')
   async loadHabsByCategory(@Param('category') category: string) {
     return this.habsService.loadHabsByCategory(category)

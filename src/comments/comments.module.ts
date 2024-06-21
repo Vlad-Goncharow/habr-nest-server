@@ -4,8 +4,6 @@ import { CommentsController } from './comments.controller';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { User } from 'src/users/users.model';
 import { PostModel } from 'src/posts/posts.model';
-import { PostsModule } from 'src/posts/posts.module';
-import { UsersModule } from 'src/users/users.module';
 import { CommentsModel } from './comments.model';
 import { AuthModule } from 'src/auth/auth.module';
 
@@ -14,7 +12,6 @@ import { AuthModule } from 'src/auth/auth.module';
   providers: [CommentsService],
   imports: [
     SequelizeModule.forFeature([CommentsModel, User, PostModel]),
-    PostsModule,
     AuthModule,
   ],
   exports: [

@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { BelongsTo, BelongsToMany, Column, DataType, ForeignKey, HasMany, Model, Table } from "sequelize-typescript";
+import { BelongsToMany, Column, DataType, ForeignKey, HasMany, Model, Table } from "sequelize-typescript";
 import { User } from "src/users/users.model";
 import { HabPosts } from "./hab-posts.model";
 import { PostModel } from "src/posts/posts.model";
@@ -36,8 +36,8 @@ export class Hab extends Model<Hab, HabCreationAttrs> {
   description: string;
 
   @ApiProperty({ example: 'avatar.jpg', description: 'Рейтинг хаба' })
-  @Column({ type: DataType.STRING, defaultValue: 0 })
-  rating: string;
+  @Column({ type: DataType.INTEGER, defaultValue: 0 })
+  rating: number;
 
   @ApiProperty({ description: "Посты с данным хабом", type: () => [PostModel] })
   @BelongsToMany(() => PostModel, () => HabPosts)

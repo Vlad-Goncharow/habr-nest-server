@@ -4,13 +4,18 @@ import { BelongsTo, BelongsToMany, Column, DataType, ForeignKey, HasMany, Model,
 import { CommentsModel } from "src/comments/comments.model";
 import { HabPosts } from "src/habs/hab-posts.model";
 import { Hab } from "src/habs/habs.model";
+import { UserFavoritePosts } from "src/users/user-favorite-posts.model";
 import { User } from "src/users/users.model";
 
 
 interface PostCreationAttrs {
-  title: string
-  image: string
-  content: string
+ title: string
+ image: string
+ content: string
+ userId: string
+ category: string
+ type: string
+ habs: number[]
 }
 
 @Table({ tableName: 'posts' })
@@ -47,10 +52,6 @@ export class PostModel extends Model<PostModel, PostCreationAttrs> {
   @Column({ type: DataType.STRING, defaultValue: 'develop', allowNull: false })
   type: string;
 
-  @ApiProperty({ example: 0, description: 'Колличество коментариев' })
-  @Column({ type: DataType.INTEGER, defaultValue: 0, allowNull: false })
-  commentsCount: number;
-
   @ApiProperty({ description: "Автор поста", type: () => [User] })
   @BelongsTo(() => User)
   author: User 
@@ -59,9 +60,13 @@ export class PostModel extends Model<PostModel, PostCreationAttrs> {
   @BelongsToMany(() => Hab, () => HabPosts)
   habs: Hab[];
 
-  @ApiProperty({ description: "Коментарии поста", type: () => [CommentsModel] })
+  @ApiProperty({ description: "Комментарии поста", type: () => [CommentsModel] })
   @HasMany(() => CommentsModel)
   comments: CommentsModel[];
+
+  @ApiProperty({ description: "Избранные", type: () => [User] })
+  @BelongsToMany(() => User, () => UserFavoritePosts)
+  favorites: User[];
 
   @ApiProperty({ example: '1', description: 'Ключ юзера' })
   @ForeignKey(() => User)

@@ -10,17 +10,9 @@ import { PostsService } from './posts.service';
 @Controller('posts')
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
-  //Популярные посты за неделю
-  @ApiOperation({ summary: 'Популярные посты за неделю' })
-  @Get('/weekly/:category')
-  loadWeeklyPosts(
-    @Param('category') category: string,
-  ) {
-    return this.postsService.loadWeeklyPosts(category)
-  }
-  
-  //Создание поста
-  @ApiOperation({ summary: "Создание поста" })
+    
+  //create post
+  @ApiOperation({ summary: "create post" })
   @UseGuards(JwtAuthGuard)
   @Post()
   create(@Req() req, @Body() createPostDto: CreatePostDto, ) {
@@ -29,16 +21,16 @@ export class PostsController {
   }
 
 
-  //Получение одного поста
-  @ApiOperation({summary:'Получение одного поста'})
+  //load single post
+  @ApiOperation({summary:'load single post'})
   @Get('/:postId')
   loadPostById(@Param('postId') postId:number){
     return this.postsService.loadPostById(postId)
   }
 
 
-  //Пойск постов по названия
-  @ApiOperation({ summary: 'Пойск постов по названия' })
+  //search posts
+  @ApiOperation({ summary: 'search posts' })
   @Get('/search/:title')
   seachPosts(
     @Param('title') title: string,
@@ -48,8 +40,16 @@ export class PostsController {
   }
 
 
-  //Получение постов
-  @ApiOperation({ summary: 'Получение постов' })
+  //load weekly posts on sidebar
+  @ApiOperation({ summary: 'load weekly posts on sidebar' })
+  @Get('/weekly/:category')
+  loadWeeklyPosts(@Param('category') category: string,) {
+    return this.postsService.loadWeeklyPosts(category)
+  }
+
+
+  //load posts(main page)
+  @ApiOperation({ summary: 'load posts(main page)' })
   @Get('/:category/:type')
   loadPosts(
     @Param('category') category: string, 
@@ -59,8 +59,8 @@ export class PostsController {
     return this.postsService.loadPosts(category, type, Number(page), Number(pageSize))
   }
 
-  //Удаление поста
-  @ApiOperation({ summary: 'Удаление поста' })
+  //delete post
+  @ApiOperation({ summary: 'delete post' })
   @Roles('MODERATOR')
   @UseGuards(RolesGuard)
   @Post('/delete/:postId')
@@ -69,8 +69,8 @@ export class PostsController {
   }
 
 
-  //Получение постов юзера
-  @ApiOperation({ summary: 'Получение постов юзера' })
+  //load user posts
+  @ApiOperation({ summary: 'load user posts' })
   @Get('/user/:userId/:type')
   loadUserPosts(
     @Param('userId') userId: string,
@@ -81,9 +81,8 @@ export class PostsController {
   }
 
 
-
-  //Получение посто хаба
-  @ApiOperation({ summary: 'Получение посто хаба' })
+  //load hab posts
+  @ApiOperation({ summary: 'load hab posts' })
   @Get('/hab/:habId/:type')
   loadHabPosts(
     @Param('habId') habId: string,
@@ -94,5 +93,16 @@ export class PostsController {
   }
 
 
-  
+  //load user favorites posts
+  @ApiOperation({ summary: "load user favorites posts" })
+  @Get('/favorites/:type/:userId')
+  loadUserFavoritesPosts
+    (
+      @Param('type') type: string,
+      @Param('userId') userId: number,
+      @Query('page') page: number,
+      @Query('pageSize') pageSize: number,
+    ) {
+    return this.postsService.loadUserFavoritesPosts(userId, type, page, pageSize)
+  }
 }

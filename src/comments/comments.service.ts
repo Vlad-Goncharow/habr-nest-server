@@ -1,22 +1,17 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { CreateCommentDto } from './dto/create-comment.dto';
 import { InjectModel } from '@nestjs/sequelize';
-import { CommentsModel } from './comments.model';
-import { PostsService } from 'src/posts/posts.service';
-import { User } from 'src/users/users.model';
 import { PostModel } from 'src/posts/posts.model';
+import { User } from 'src/users/users.model';
+import { CommentsModel } from './comments.model';
+import { CreateCommentDto } from './dto/create-comment.dto';
 
 @Injectable()
 export class CommentsService {
-  constructor(@InjectModel(CommentsModel) private commentsRepository: typeof CommentsModel,
-                                          private postService:PostsService) {}
+  constructor(@InjectModel(CommentsModel) private commentsRepository: typeof CommentsModel) {}
 
-    
+  //create comment
   async createComment(postId: number, userId:number, CreateCommentDto: CreateCommentDto){
     const data = await this.commentsRepository.create({ ...CreateCommentDto, userId, postId })
-    const post = await this.postService.loadPostById(Number(postId))
-    await post.$add('comments', data)
-    await post. increment('commentsCount', {by:1})
 
     const comment = await this.commentsRepository.findByPk(data.id, {
       include: [
@@ -30,7 +25,8 @@ export class CommentsService {
     return comment
   }
 
-  async loadPostComments(postId:number){
+  //load comments by postId
+  async loadCommentsByPostId(postId:number){
     const comments = await this.commentsRepository.findAll({
       where:{postId},
       include:[
@@ -44,7 +40,8 @@ export class CommentsService {
     return comments
   }
 
-  async deleteComments(commentdId:number, userId:number) {
+  //delete comment
+  async deleteCommentByCommentId(commentdId:number, userId:number) {
     const data = await this.commentsRepository.findByPk(commentdId)
     
     if(data && data.userId === userId){
@@ -58,7 +55,8 @@ export class CommentsService {
     }
   }
 
-  async loadUserComments(userId:number, page:number, pageSize:number) {
+  //load all user comments
+  async loadCommentsByUserId(userId:number, page:number, pageSize:number) {
     const offset = (page - 1) * pageSize;
 
     const {rows,count} = await this.commentsRepository.findAndCountAll({

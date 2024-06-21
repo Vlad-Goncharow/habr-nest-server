@@ -10,8 +10,8 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  //Выдать роль
-  @ApiOperation({ summary: "Выдать роль" })
+  //add user role
+  @ApiOperation({ summary: "add user role" })
   @Roles('ADMIN')
   @UseGuards(RolesGuard)
   @Post('/:userId/role/:roleId/add')
@@ -20,8 +20,8 @@ export class UsersController {
   }
 
 
-  //Забрать роль
-  @ApiOperation({ summary: "Забрать роль" })
+  //remove user role
+  @ApiOperation({ summary: "remove user role" })
   @Roles('ADMIN')
   @UseGuards(RolesGuard)
   @Post('/:userId/role/:roleId/remove')
@@ -30,16 +30,16 @@ export class UsersController {
   }
 
 
-  //Получение пользователя
-  @ApiOperation({ summary: "Получение пользователя" })
+  //load user by id
+  @ApiOperation({ summary: "load user by id" })
   @Get('/:userId')
   async getUserById(@Param('userId') userId: string) {
     return this.usersService.getUserById(Number(userId))
   }
 
 
-  //Подписка на человека
-  @ApiOperation({ summary: "Подписка на человека" })
+  //subscribe
+  @ApiOperation({ summary: "subscribe" })
   @UseGuards(JwtAuthGuard)
   @Post('/subscribe/:userId')
   async subscribe(@Req() req, @Param('userId') userId: string) {
@@ -48,8 +48,8 @@ export class UsersController {
   }
 
 
-  //Отписка от человека
-  @ApiOperation({ summary: "Отписка от человека" })
+  //unsubscribe
+  @ApiOperation({ summary: "unsubscribe" })
   @UseGuards(JwtAuthGuard)
   @Post('/unsubscribe/:userId')
   async unSubscribe(@Req() req, @Param('userId') userId: string) {
@@ -71,8 +71,8 @@ export class UsersController {
   }
 
 
-  //Загрузка авторов категории
-  @ApiOperation({ summary: "Загрузка авторов категории" })
+  //load category authors
+  @ApiOperation({ summary: "load category authors" })
   @Get('/authors/:category/:nickname')
   loadCategoryAuthors
     (
@@ -82,5 +82,33 @@ export class UsersController {
       @Query('pageSize') pageSize: number,
     ) {
     return this.usersService.loadCategoryAuthors(nickname, category, page, pageSize)
+  }
+
+  
+  //add favorite post
+  @ApiOperation({ summary: "add favorite post" })
+  @UseGuards(JwtAuthGuard)
+  @Post('/favorites/post/add/:postId')
+  addFavoritePost
+    (
+      @Req() req,
+      @Param('postId') postId: string,
+    ) {
+    const { id } = req.user
+    return this.usersService.addFavoritePost(Number(id), Number(postId))
+  }
+
+
+  //delete favorite post
+  @ApiOperation({ summary: "delete favorite post" })
+  @UseGuards(JwtAuthGuard)
+  @Post('/favorites/post/delete/:postId')
+  removeFavoritePost
+    (
+      @Req() req,
+      @Param('postId') postId: string,
+    ) {
+    const { id } = req.user
+    return this.usersService.removeFavoritePost(Number(id), Number(postId))
   }
 }

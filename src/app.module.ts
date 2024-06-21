@@ -22,6 +22,7 @@ import { UserSubscriptions } from './users/user-subscriptions-model';
 import { CommentsModule } from './comments/comments.module';
 import { CommentsModel } from './comments/comments.model';
 import { FilesModule } from './files/files.module';
+import { UserFavoritePosts } from './users/user-favorite-posts.model';
 @Module({
   controllers: [],
   providers: [],
@@ -37,7 +38,7 @@ import { FilesModule } from './files/files.module';
       username: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
-      models: [User, Role, UserRoles, UserSubscriptions, RefreshToken, PostModel, Hab, HabPosts, HabAuthors, HabSubscribers, CommentsModel],
+      models: [User, Role, UserRoles, UserSubscriptions, UserFavoritePosts, RefreshToken, PostModel, Hab, HabPosts, HabAuthors, HabSubscribers, CommentsModel],
       autoLoadModels: true,
     }),
     FilesModule,
