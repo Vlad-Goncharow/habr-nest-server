@@ -2,13 +2,11 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { Role } from './roles.model';
-import { UserRoles } from './user-roles.model';
 
 @Injectable()
 export class RolesService {
 
-  constructor(@InjectModel(Role) private roleRepository: typeof Role,
-    @InjectModel(UserRoles) private roleUserRoles: typeof UserRoles){}
+  constructor(@InjectModel(Role) private roleRepository: typeof Role){}
 
   //create new role
   async createRole(dto: CreateRoleDto) {

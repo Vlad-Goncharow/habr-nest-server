@@ -8,8 +8,8 @@ import { RolesService } from './roles.service';
 export class RolesController {
   constructor(private readonly rolesService: RolesService) {}
 
-  //Создание новой роли.
-  @ApiOperation({ summary: "Создание новой роли" })
+  //create new role
+  @ApiOperation({ summary: "create new role" })
   @Post()
   createRole(@Body() dto: CreateRoleDto) {
     return this.rolesService.createRole(dto);

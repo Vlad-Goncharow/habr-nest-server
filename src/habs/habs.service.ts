@@ -1,15 +1,13 @@
 import { BadRequestException, HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
-import { CreateHabDto } from './dto/create-hab.dto';
 import { InjectModel } from '@nestjs/sequelize';
-import { Hab } from './habs.model';
-import { PostModel } from 'src/posts/posts.model';
+import sequelize, { Op } from 'sequelize';
 import { User } from 'src/users/users.model';
-import { HabPosts } from './hab-posts.model';
-import { HabAuthors } from './hab-authors.model';
+import { CreateHabDto } from './dto/create-hab.dto';
 import { SubscribeDto } from './dto/subscribe-hab.dto';
+import { HabAuthors } from './hab-authors.model';
+import { HabPosts } from './hab-posts.model';
 import { HabSubscribers } from './hab-subscribers.model';
-import { Op, Sequelize } from 'sequelize';
-import sequelize from 'sequelize';
+import { Hab } from './habs.model';
 
 
 @Injectable()
@@ -20,6 +18,7 @@ export class HabsService {
   @InjectModel(HabAuthors)  private habAuthorsModel: typeof HabAuthors,
   @InjectModel(HabSubscribers) private habSubscribersModel: typeof HabSubscribers){}
 
+  //create hab
   async createHab(createHabDto: CreateHabDto) {
     const findHab = await this.habRepository.findOne({where:{title:createHabDto.title}})
 
@@ -32,54 +31,27 @@ export class HabsService {
     return hab
   }
 
-  async getHabs(hubIds: number[]){
-    const selectedHubs = await this.habRepository.findAll({
-      where: {
-        id: hubIds
-      }
-    });
-
-    return selectedHubs
-  }
-
+  //load single hab data
   async loadHabById(id:number){
     const hab = await this.habRepository.findByPk(Number(id))
 
     return hab
   }
 
-  async loadHabsByValues(category: string, title:string, sort:string, order:string, page:number, pageSize:number){
+  //load habs by category | title, main page, search page
+  async loadHabsByValues(category: string, title: string, sort: string, order: string, page: number, pageSize: number) {
     const offset = (page - 1) * pageSize;
 
     const myWhere = () => {
-      if(category === 'all'){
-        if(title === 'all'){
-          return {};
-        } else{
-          return {
-            title: { [Op.like]: `%${title}%` } 
-          }
-        }
-      } else{
-        if(title === 'all'){
-          return {
-            category
-          }
-        } else {
-          return {
-            category, 
-            title: { [Op.like]: `%${title}%`} 
-          }
-        }
-      }
-    }
+      return {
+        ...(category !== 'all' && { category }),
+        ...(title.trim() !== '' && { title: { [Op.like]: `%${title}%` } })
+      };
+    };
+
     let myOrder = [];
-    
-    if(sort === 'subs' || sort === 'rating' && order === 'asc' || order === 'desc'){
-      myOrder = [[
-        sort === 'subs' ? 'usersSubscribersCount' : 'rating',
-        order.toUpperCase()
-      ]]
+    if ((sort === 'subs' || sort === 'rating') && (order === 'asc' || order === 'desc')) {
+      myOrder = [[sort === 'subs' ? 'usersSubscribersCount' : 'rating', order.toUpperCase()]];
     }
 
     const { rows, count } = await this.habRepository.findAndCountAll({
@@ -95,7 +67,7 @@ export class HabsService {
       order: myOrder,
       limit: pageSize,
       offset: offset,
-    })
+    });
 
     return {
       habs: rows,
@@ -103,39 +75,7 @@ export class HabsService {
     };
   }
 
-  async searchHabs(title, page, pageSize,sort, order){
-    const offset = (page - 1) * pageSize;
-
-    let myOrder = [];
-
-    if (sort === 'subs' || sort === 'rating' && order === 'asc' || order === 'desc') {
-      myOrder = [[
-        sort === 'subs' ? 'usersSubscribersCount' : 'rating',
-        order.toUpperCase()
-      ]]
-    }
-
-    const {rows, count} = await this.habRepository.findAndCountAll({
-      where: { title: { [Op.like]: `%${title}%` } },
-      attributes: {
-        include: [
-          [
-            sequelize.literal('(SELECT COUNT(*) FROM "hab_subscribers" WHERE "hab_subscribers"."habId" = "Hab"."id")'),
-            'usersSubscribersCount',
-          ],
-        ],
-      },
-      order: myOrder,
-      limit: pageSize,
-      offset: offset,
-    })
-
-    return {
-      habs: rows,
-      length: count
-    };
-  }
-
+  //load hab authors
   async loadHabAuthors(id:string, page:number, pageSize:number){
     const offset = (page - 1) * pageSize;
 
@@ -158,6 +98,7 @@ export class HabsService {
     }
   }
 
+  //subscribe hab
   async subscribeToHab(dto: SubscribeDto){
     const hab = await this.loadHabById(Number(dto.habId))
     if (!hab) {
@@ -179,6 +120,7 @@ export class HabsService {
     }
   }
 
+  //unsubscribe hab
   async unSubscribeToHab(dto: SubscribeDto) {
     const hab = await this.loadHabById(Number(dto.habId))
     if (!hab) {
@@ -199,21 +141,16 @@ export class HabsService {
     }
   }
 
+  //delete single author in hab authors
   async deleteAuthorInHabAuthors(userId: number, habId: number){
     const hab = await this.loadHabById(habId)
     
     if(hab){
       await hab.$remove('author', userId)
     }
-    // const author = await this.habAuthorsModel.findOne({ where: { userId, habId} })
-    
-    // if (!author) {
-    //   throw new HttpException('Такого поста в хабе не существует', HttpStatus.NOT_FOUND)
-    // }
-
-    // author.destroy()
   }
 
+  //load hubs subscribed to by the user
   async loadUserHabs(userId: number) {
     const data = await this.habRepository.findAll({
       include: [
@@ -245,7 +182,7 @@ export class HabsService {
     return data;
   }
 
-
+  //load the full list of hubs, to create a post
   async getAllHabs(){
     const habs = await this.habRepository.findAll({
       attributes: ['id', 'title'],
@@ -254,6 +191,7 @@ export class HabsService {
     return habs
   }
 
+  //load habs by category for sidebar
   async loadHabsByCategory(category:string){
     const habs = await this.habRepository.findAll({
       where:{category},
@@ -275,5 +213,17 @@ export class HabsService {
     })
 
     return habs
+  }
+
+
+  //find habs array by ids
+  async getHabs(hubIds: number[]) {
+    const selectedHubs = await this.habRepository.findAll({
+      where: {
+        id: hubIds
+      }
+    });
+
+    return selectedHubs
   }
 }

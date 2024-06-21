@@ -7,6 +7,7 @@ import { Hab } from "src/habs/habs.model";
 import { HabSubscribers } from "src/habs/hab-subscribers.model";
 import { UserSubscriptions } from "./user-subscriptions-model";
 import { CommentsModel } from "src/comments/comments.model";
+import { UserFavoritePosts } from "./user-favorite-posts.model";
 
 
 interface UserCreationAttrs {
@@ -79,6 +80,10 @@ export class User extends Model<User, UserCreationAttrs> {
   @ApiProperty({ description: "Подписки на хабы пользователя", type: () => [HabSubscribers] })
   @BelongsToMany(() => Hab, () => HabSubscribers)
   habSubscribers: Hab[];
+
+  @ApiProperty({ description: "Избранные посты", type: () => [PostModel] })
+  @BelongsToMany(() => PostModel, () => UserFavoritePosts)
+  favoritePosts: PostModel[];
 
   @BelongsToMany(() => User, {
     through: { model: () => UserSubscriptions, unique: false },

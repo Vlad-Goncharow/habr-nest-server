@@ -14,12 +14,13 @@ import { HabAuthors } from 'src/habs/hab-authors.model';
 import { HabSubscribers } from 'src/habs/hab-subscribers.model';
 import { UserSubscriptions } from './user-subscriptions-model';
 import { CommentsModel } from 'src/comments/comments.model';
+import { UserFavoritePosts } from './user-favorite-posts.model';
 
 @Module({
   controllers: [UsersController],
   providers: [UsersService],
   imports:[
-    SequelizeModule.forFeature([User, CommentsModel, Role, UserRoles, PostModel, Hab,  HabPosts, HabAuthors, HabSubscribers, UserSubscriptions]),
+    SequelizeModule.forFeature([User, UserFavoritePosts, CommentsModel, Role, UserRoles, PostModel, Hab,  HabPosts, HabAuthors, HabSubscribers, UserSubscriptions]),
     RolesModule,
     forwardRef(() => AuthModule),
   ],

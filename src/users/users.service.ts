@@ -1,15 +1,15 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
+import { Op } from 'sequelize';
+import { UpdateProfileDto } from 'src/auth/dto/UpdateProfileDto';
 import { Hab } from 'src/habs/habs.model';
 import { PostModel } from 'src/posts/posts.model';
 import { Role } from 'src/roles/roles.model';
 import { RolesService } from 'src/roles/roles.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { User } from './users.model';
+import { UserFavoritePosts } from './user-favorite-posts.model';
 import { UserSubscriptions } from './user-subscriptions-model';
-import { PostsService } from 'src/posts/posts.service';
-import { UpdateProfileDto } from 'src/auth/dto/UpdateProfileDto';
-import sequelize, { Op } from 'sequelize';
+import { User } from './users.model';
 
 @Injectable()
 export class UsersService {
@@ -39,11 +39,6 @@ export class UsersService {
     return userWithoutPassword;
   }
 
-  //update profile
-  async updateProfile(id: number, dto: UpdateProfileDto){
-    return this.userRepository.update(dto,{where:{id}})
-  }
-
   //add user new role
   async addRole(userId: string, roleId: string) {
     const user = await this.userRepository.findByPk(userId)
@@ -70,21 +65,7 @@ export class UsersService {
     throw new HttpException('Пользователь или роль не найдены', HttpStatus.NOT_FOUND)
   }
 
-  //load user by email
-  async getUserByEmail(email:string){
-    const user = await this.userRepository.findOne({where: {email}})
-
-    return user
-  }
-
-  //load user by nickname
-  async getUserByNickname(nickname: string) {
-    const user = await this.userRepository.findOne({ where: { nickname }})
-
-    return user
-  }
-
-  //load current user
+  //load user by id
   async getUserById(userId: number) {
     const user = await this.userRepository.findByPk(userId, {
       attributes: { exclude: ['password'] },
@@ -220,6 +201,10 @@ export class UsersService {
           through: { attributes: [] },
           association: 'habSubscribers',
           attributes: ['id']
+        }, {
+          through: { attributes: [] },
+          association: 'favoritePosts',
+          attributes: ['id']
         }
       ]
     })
@@ -231,17 +216,19 @@ export class UsersService {
     return user
   }
 
+  //load category authors
   async loadCategoryAuthors(nickname:string, category:string, page:number, pageSize:number){
     const offset = (page - 1) * pageSize;
 
     const myWhere = category === 'all' ? {} : {category}
-    const userWHre = nickname === 'all' ? {} : {nickname:{ [Op.like]: `%${nickname}%` }}
+    const userWHre = nickname === ' ' ? {} : {nickname:{ [Op.like]: `%${nickname}%` }}
 
     const {count,rows} = await this.userRepository.findAndCountAll({
       where: userWHre,
       include: [
         {
           model: PostModel,
+          as:'posts',
           where: myWhere,
           attributes:[],
         }
@@ -256,5 +243,84 @@ export class UsersService {
       length:count,
       authors:rows
     }
+  }
+
+  //add favorite post
+  async addFavoritePost(userId:number, postId:number){
+    const post = await PostModel.findByPk(postId)
+
+    if(!post){
+      throw new HttpException('Пост не найден', HttpStatus.NOT_FOUND)
+    }
+
+    const data = await UserFavoritePosts.findOne({
+      where: {
+        userId,
+        postId
+      }
+    })
+
+    if (data) {
+      throw new HttpException('Уже в избранном', HttpStatus.BAD_REQUEST)
+    }
+
+    await UserFavoritePosts.create({ userId, postId })
+
+    return {
+      success: true
+    }
+  }
+
+  //delete favorite post
+  async removeFavoritePost(userId:number, postId:number){
+    const post = await PostModel.findByPk(postId)
+
+    if(!post){
+      throw new HttpException('Пост не найден', HttpStatus.NOT_FOUND)
+    }
+
+    const data = await UserFavoritePosts.findOne({
+      where: {
+        userId,
+        postId
+      }
+    })
+
+    if (!data) {
+      throw new HttpException('Такого поста нет в избранном', HttpStatus.BAD_REQUEST)
+    }
+    
+    const deleted = await UserFavoritePosts.destroy({
+      where: {
+        userId,
+        postId
+      }
+    })
+
+    return {
+      deleted,
+      success:true
+    }
+  }
+
+
+
+  //load user by email
+  async getUserByEmail(email: string) {
+    const user = await this.userRepository.findOne({ where: { email } })
+
+    return user
+  }
+
+  //load user by nickname
+  async getUserByNickname(nickname: string) {
+    const user = await this.userRepository.findOne({ where: { nickname } })
+
+    return user
+  }
+
+  //update profile
+  async updateProfile(id: number, dto: UpdateProfileDto) {
+    return this.userRepository.update(dto, { where: { id } })
   }
 }

@@ -11,8 +11,8 @@ import { RolesGuard } from 'src/auth/roles.guard';
 export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}
 
-  //Создание коментария
-  @ApiOperation({ summary: "Создание коментария" })
+  //create comment
+  @ApiOperation({ summary: "create comment" })
   @UseGuards(JwtAuthGuard)
   @Post('/create/:postId')
   async createComment(
@@ -24,38 +24,38 @@ export class CommentsController {
     return this.commentsService.createComment(Number(postId), id, CreateCommentDto);
   }
 
-  //Получение коментариев поста
-  @ApiOperation({ summary: "Получение коментариев поста" })
+  //load comments by postId
+  @ApiOperation({ summary: "load comments by postId" })
   @Get('/load/:postId')
-  async loadPostComments(
+  async loadCommentsByPostId(
     @Param('postId') postId: string,
   ) {
-    return this.commentsService.loadPostComments(Number(postId));
+    return this.commentsService.loadCommentsByPostId(Number(postId));
   }
 
 
-  //Удаление коментария
-  @ApiOperation({ summary: "Удаление коментария" })
+  //delete comment
+  @ApiOperation({ summary: "delete comment" })
   // @Roles('ADMIN')
   // @UseGuards(RolesGuard)
   @UseGuards(JwtAuthGuard)
   @Post('/delete/:commentdId')
-  async deleteComments(
+  async deleteCommentByCommentId(
     @Param('commentdId') commentdId: string,
     @Req() req,
   ) {
     const { id } = req.user
-    return this.commentsService.deleteComments(Number(commentdId), id);
+    return this.commentsService.deleteCommentByCommentId(Number(commentdId), id);
   }
 
 
-  //Удаление коментария
-  @ApiOperation({ summary: "Удаление коментария" })
+  //load all user comments
+  @ApiOperation({ summary: "load all user comments" })
   @Get('/user/:userId')
-  async loadUserComments(
+  async loadCommentsByUserId(
     @Param('userId') userId: string,
     @Query('page') page: number,
     @Query('pageSize') pageSize: number,   ) {
-    return this.commentsService.loadUserComments(Number(userId), page, pageSize);
+    return this.commentsService.loadCommentsByUserId(Number(userId), page, pageSize);
   }
 }
