@@ -217,11 +217,16 @@ export class UsersService {
   }
 
   //load category authors
-  async loadCategoryAuthors(nickname:string, category:string, page:number, pageSize:number){
+  async loadCategoryAuthors(nickname:string, category:string, sort:string, order:string, page:number, pageSize:number){
     const offset = (page - 1) * pageSize;
 
     const myWhere = category === 'all' ? {} : {category}
     const userWHre = nickname === ' ' ? {} : {nickname:{ [Op.like]: `%${nickname}%` }}
+
+    let myOrder = [];
+    if ((sort === 'karma' || sort === 'rating') && (order === 'asc' || order === 'desc')) {
+      myOrder = [[sort === 'rating' ? 'rating' : 'karma', order.toUpperCase()]];
+    }
 
     const {count,rows} = await this.userRepository.findAndCountAll({
       where: userWHre,
@@ -235,6 +240,7 @@ export class UsersService {
       ],
       attributes: { exclude: ['password'] },
       limit: pageSize,
+      order: myOrder,
       offset: offset,
       distinct:true,
     });

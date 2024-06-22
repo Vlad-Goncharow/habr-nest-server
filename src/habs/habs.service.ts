@@ -76,8 +76,13 @@ export class HabsService {
   }
 
   //load hab authors
-  async loadHabAuthors(id:string, page:number, pageSize:number){
+  async loadHabAuthors(id:string,sort:string, order:string, page:number, pageSize:number){
     const offset = (page - 1) * pageSize;
+
+    let myOrder = [];
+    if ((sort === 'karma' || sort === 'rating') && (order === 'asc' || order === 'desc')) {
+      myOrder = [[sort === 'rating' ? 'rating' : 'karma', order.toUpperCase()]];
+    }
 
     const {count, rows} = await this.habAuthorsModel.findAndCountAll({
       where: { habId: id },
@@ -88,6 +93,7 @@ export class HabsService {
         },
       ],
       limit: pageSize,
+      order: myOrder,
       offset: offset,
       distinct: true,
     });

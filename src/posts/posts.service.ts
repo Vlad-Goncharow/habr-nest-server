@@ -71,7 +71,6 @@ export class PostsService {
   //load posts(main page)
   async loadPosts(category: string, type: string, page: number, pageSize){
     const offset = (page - 1) * pageSize;
-    console.log('category', category);
     const myWhere = category === 'all' ? {type} : {category, type}
     
     const { count, rows } = await this.postRepository.findAndCountAll({
@@ -320,7 +319,6 @@ export class PostsService {
   //load weekly posts on sidebar
   async loadWeeklyPosts(category:string){
     const whereCategory = category !== 'all' ? { category } : {}
-    console.log('here2');
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 

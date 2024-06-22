@@ -51,10 +51,12 @@ export class HabsController {
   loadHabAuthors
   (
     @Param('id') id: string,
+    @Query('sort') sort: string,
+    @Query('order') order: string,
     @Query('page') page: number,
     @Query('pageSize') pageSize: number,
   ){
-    return this.habsService.loadHabAuthors(id, page, pageSize)
+    return this.habsService.loadHabAuthors(id,sort, order, page, pageSize)
   }
 
 
