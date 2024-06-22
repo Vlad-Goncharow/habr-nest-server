@@ -80,8 +80,10 @@ export class UsersController {
       @Param('category') category: string,
       @Query('page') page: number,
       @Query('pageSize') pageSize: number,
+      @Query('sort') sort: string,
+      @Query('order') order: string,
     ) {
-    return this.usersService.loadCategoryAuthors(nickname, category, page, pageSize)
+    return this.usersService.loadCategoryAuthors(nickname, category, sort, order, page, pageSize)
   }
 
   
