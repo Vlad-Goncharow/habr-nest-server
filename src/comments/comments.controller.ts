@@ -24,6 +24,7 @@ export class CommentsController {
     return this.commentsService.createComment(Number(postId), id, CreateCommentDto);
   }
 
+
   //load comments by postId
   @ApiOperation({ summary: "load comments by postId" })
   @Get('/load/:postId')
@@ -57,5 +58,18 @@ export class CommentsController {
     @Query('page') page: number,
     @Query('pageSize') pageSize: number,   ) {
     return this.commentsService.loadCommentsByUserId(Number(userId), page, pageSize);
+  }
+
+
+  //load user favorites comments
+  @ApiOperation({ summary: "load user favorites comments" })
+  @Get('/favorites/:userId')
+  loadUserFavoritesComments
+    (
+      @Param('userId') userId: number,
+      @Query('page') page: number,
+      @Query('pageSize') pageSize: number,
+    ) {
+    return this.commentsService.loadUserFavoritesComments(userId, page, pageSize)
   }
 }
