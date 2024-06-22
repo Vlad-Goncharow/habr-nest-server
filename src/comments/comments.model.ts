@@ -1,6 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { BelongsTo, Column, DataType, ForeignKey, Model, Table } from "sequelize-typescript";
+import { BelongsTo, BelongsToMany, Column, DataType, ForeignKey, Model, Table } from "sequelize-typescript";
 import { PostModel } from "src/posts/posts.model";
+import { UserFavoriteComments } from "src/users/user-favorite-comments.model";
 import { User } from "src/users/users.model";
 
 
@@ -26,6 +27,10 @@ export class CommentsModel extends Model<CommentsModel> {
   @ApiProperty({ description: "Автор поста", type: () => [User] })
   @BelongsTo(() => User)
   author: User
+
+  @ApiProperty({ description: "Избранные", type: () => [User] })
+  @BelongsToMany(() => User, () => UserFavoriteComments)
+  favorites: User[];
 
   @ApiProperty({ description: "Пост в котором оставлен коментарий", type: () => [PostModel] })
   @BelongsTo(() => PostModel)

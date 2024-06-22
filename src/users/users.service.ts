@@ -10,6 +10,8 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UserFavoritePosts } from './user-favorite-posts.model';
 import { UserSubscriptions } from './user-subscriptions-model';
 import { User } from './users.model';
+import { UserFavoriteComments } from './user-favorite-comments.model';
+import { CommentsModel } from 'src/comments/comments.model';
 
 @Injectable()
 export class UsersService {
@@ -178,43 +180,6 @@ export class UsersService {
     }
   }
 
-  //load current user
-  async loadCurrentUserById(userId: number) {
-    const user = await this.userRepository.findByPk(userId, {
-      include:[
-        {
-          through: { attributes: [] },
-          association: 'roles',
-          attributes: ['id', 'value']
-        },
-        {
-          through: { attributes: [] },
-          association:'subscribers',
-          attributes:['id']
-        },
-        {
-          through: { attributes: [] },
-          association: 'subscriptions',
-          attributes: ['id']
-        },
-        {
-          through: { attributes: [] },
-          association: 'habSubscribers',
-          attributes: ['id']
-        }, {
-          through: { attributes: [] },
-          association: 'favoritePosts',
-          attributes: ['id']
-        }
-      ]
-    })
-
-    if (!user) {
-      throw new HttpException('Данный пользователь не найден', HttpStatus.NOT_FOUND)
-    }
-
-    return user
-  }
 
   //load category authors
   async loadCategoryAuthors(nickname:string, category:string, sort:string, order:string, page:number, pageSize:number){
@@ -296,7 +261,7 @@ export class UsersService {
       throw new HttpException('Такого поста нет в избранном', HttpStatus.BAD_REQUEST)
     }
     
-    const deleted = await UserFavoritePosts.destroy({
+    await UserFavoritePosts.destroy({
       where: {
         userId,
         postId
@@ -304,11 +269,66 @@ export class UsersService {
     })
 
     return {
-      deleted,
       success:true
     }
   }
 
+  //add favorite comment
+  async addFavoriteComment(userId:number, commentId:number){
+    const comment = await CommentsModel.findByPk(commentId)
+
+    if(!comment){
+      throw new HttpException('Пост не найден', HttpStatus.NOT_FOUND)
+    }
+
+    const isCommentFavorite = await UserFavoriteComments.findOne({
+      where:{
+        userId,
+        commentId
+      }
+    })
+
+    if (isCommentFavorite) {
+      throw new HttpException('Уже в избранном', HttpStatus.BAD_REQUEST)
+    }
+
+    await UserFavoriteComments.create({ userId, commentId })
+
+    return {
+      success: true
+    }
+  }
+
+  //remove favorite comment
+  async removeFavoriteComment(userId: number, commentId: number) {
+    const comment = await CommentsModel.findByPk(commentId)
+
+    if (!comment) {
+      throw new HttpException('Пост не найден', HttpStatus.NOT_FOUND)
+    }
+
+    const isCommentFavorite = await UserFavoriteComments.findOne({
+      where: {
+        userId,
+        commentId
+      }
+    })
+
+    if (!isCommentFavorite) {
+      throw new HttpException('Такого поста нет в избранном', HttpStatus.BAD_REQUEST)
+    }
+
+    await UserFavoriteComments.destroy({
+      where: {
+        userId,
+        commentId
+      }
+    })
+
+    return {
+      success: true
+    }
+  }
 
 
   //load user by email
@@ -328,5 +348,44 @@ export class UsersService {
   //update profile
   async updateProfile(id: number, dto: UpdateProfileDto) {
     return this.userRepository.update(dto, { where: { id } })
+  }
+
+  //load current user
+  async loadCurrentUserById(userId: number) {
+    const user = await this.userRepository.findByPk(userId, {
+      include: [
+        {
+          through: { attributes: [] },
+          association: 'roles',
+          attributes: ['id', 'value']
+        },{
+          through: { attributes: [] },
+          association: 'subscribers',
+          attributes: ['id']
+        },{
+          through: { attributes: [] },
+          association: 'subscriptions',
+          attributes: ['id']
+        },{
+          through: { attributes: [] },
+          association: 'habSubscribers',
+          attributes: ['id']
+        }, {
+          through: { attributes: [] },
+          association: 'favoritePosts',
+          attributes: ['id']
+        }, {
+          through: { attributes: [] },
+          association: 'favoriteComments',
+          attributes: ['id']
+        }
+      ]
+    })
+
+    if (!user) {
+      throw new HttpException('Данный пользователь не найден', HttpStatus.NOT_FOUND)
+    }
+
+    return user
   }
 }

@@ -32,8 +32,9 @@ export class CommentsService {
       include:[
         {
           model: User,
-          attributes: ['id', 'avatar', 'nickname']
-        },
+          as: 'author',
+          attributes: ['id', 'avatar', 'nickname'],
+        }
       ]
     })
 
@@ -64,6 +65,7 @@ export class CommentsService {
       include:[
         {
           model:User,
+          as: 'author',
           attributes: ['id', 'avatar', 'nickname'], 
         },
         {
@@ -79,5 +81,35 @@ export class CommentsService {
       comments:rows,
       length:count
     }
+  }
+
+  //load user favorites comments
+  async loadUserFavoritesComments(userId:number, page:number, pageSize:number){
+    const offset = (page - 1) * pageSize;
+
+    const {rows,count} = await this.commentsRepository.findAndCountAll({
+      include:[
+        {
+          model: User,
+          as: 'favorites',
+          where: { id: userId }
+        }, {
+          model: User,
+          as:'author',
+          attributes: ['id', 'avatar', 'nickname'],
+        }, {
+          model: PostModel,
+          attributes: ['id', 'title'],
+        }
+      ],
+      limit: pageSize,
+      offset: offset,
+      distinct: true,
+    })
+
+    return {
+      comments: rows,
+      length: count
+    };
   }
 }

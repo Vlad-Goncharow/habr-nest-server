@@ -113,4 +113,32 @@ export class UsersController {
     const { id } = req.user
     return this.usersService.removeFavoritePost(Number(id), Number(postId))
   }
+
+
+  //add favorite comment
+  @ApiOperation({ summary: "add favorite comment" })
+  @UseGuards(JwtAuthGuard)
+  @Post('/favorites/comment/add/:commentId')
+  addFavoriteComment
+    (
+      @Req() req,
+      @Param('commentId') commentId: number,
+    ) {
+    const { id } = req.user
+    return this.usersService.addFavoriteComment(Number(id), commentId)
+  }
+
+
+  //remove favorite comment
+  @ApiOperation({ summary: "remove favorite comment" })
+  @UseGuards(JwtAuthGuard)
+  @Post('/favorites/comment/remove/:commentId')
+  removeFavoriteComment
+    (
+      @Req() req,
+      @Param('commentId') commentId: number,
+    ) {
+    const { id } = req.user
+    return this.usersService.removeFavoriteComment(Number(id), commentId)
+  }
 }
