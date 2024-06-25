@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Controller, Delete, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Roles } from 'src/auth/roles-auth.decorator';
 import { RolesGuard } from 'src/auth/roles.guard';
@@ -104,7 +104,7 @@ export class UsersController {
   //delete favorite post
   @ApiOperation({ summary: "delete favorite post" })
   @UseGuards(JwtAuthGuard)
-  @Post('/favorites/post/delete/:postId')
+  @Delete('/favorites/post/delete/:postId')
   removeFavoritePost
     (
       @Req() req,
@@ -132,7 +132,7 @@ export class UsersController {
   //remove favorite comment
   @ApiOperation({ summary: "remove favorite comment" })
   @UseGuards(JwtAuthGuard)
-  @Post('/favorites/comment/remove/:commentId')
+  @Delete('/favorites/comment/delete/:commentId')
   removeFavoriteComment
     (
       @Req() req,

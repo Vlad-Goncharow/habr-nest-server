@@ -4,6 +4,7 @@ import { PostModel } from 'src/posts/posts.model';
 import { User } from 'src/users/users.model';
 import { CommentsModel } from './comments.model';
 import { CreateCommentDto } from './dto/create-comment.dto';
+import { UserFavoriteComments } from 'src/users/user-favorite-comments.model';
 
 @Injectable()
 export class CommentsService {
@@ -17,6 +18,7 @@ export class CommentsService {
       include: [
         {
           model: User,
+          as:'author',
           attributes: ['id', 'avatar', 'nickname']
         },
       ]
@@ -42,15 +44,18 @@ export class CommentsService {
   }
 
   //delete comment
-  async deleteCommentByCommentId(commentdId:number, userId:number) {
-    const data = await this.commentsRepository.findByPk(commentdId)
+  async deleteCommentByCommentId(commentId:number, userId:number) {
+    const data = await this.commentsRepository.findByPk(commentId)
     
     if(data && data.userId === userId){
-      data.destroy()
+      const favorites = await UserFavoriteComments.findAll({ where: { commentId } });
+      const favoriteDeletions = favorites.map(favorite => favorite.destroy());
 
-      return{
-        success:true
-      }
+      await Promise.all(favoriteDeletions);
+
+      await data.destroy();
+
+      return { success: true };
     } else{
       throw new HttpException('Такой коментарий не найден', HttpStatus.NOT_FOUND)
     }

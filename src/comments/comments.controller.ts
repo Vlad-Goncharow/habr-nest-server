@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateCommentDto } from './dto/create-comment.dto';
@@ -40,7 +40,7 @@ export class CommentsController {
   // @Roles('ADMIN')
   // @UseGuards(RolesGuard)
   @UseGuards(JwtAuthGuard)
-  @Post('/delete/:commentdId')
+  @Delete('/delete/:commentdId')
   async deleteCommentByCommentId(
     @Param('commentdId') commentdId: string,
     @Req() req,
