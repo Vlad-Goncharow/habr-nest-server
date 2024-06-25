@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { Roles } from 'src/auth/roles-auth.decorator';
@@ -63,7 +63,7 @@ export class PostsController {
   @ApiOperation({ summary: 'delete post' })
   @Roles('MODERATOR')
   @UseGuards(RolesGuard)
-  @Post('/delete/:postId')
+  @Delete('/delete/:postId')
   delePostById(@Param('postId') postId:string){
     return this.postsService.delePostById(postId)
   }

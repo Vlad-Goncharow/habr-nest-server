@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Put, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Patch, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
@@ -85,7 +85,7 @@ export class AuthController {
   //Обновление профиля
   @ApiOperation({ summary: "Обновление профиля" })
   @UseGuards(JwtAuthGuard)
-  @Put('/profile-update')
+  @Patch('/profile-update')
   async profileUpdate(@Req() req, @Body() dto: UpdateProfileDto, @Res() res: Response) {
     const { id } = req.user
 
