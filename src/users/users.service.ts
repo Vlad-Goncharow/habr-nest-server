@@ -180,7 +180,6 @@ export class UsersService {
     }
   }
 
-
   //load category authors
   async loadCategoryAuthors(nickname:string, category:string, sort:string, order:string, page:number, pageSize:number){
     const offset = (page - 1) * pageSize;
@@ -330,6 +329,7 @@ export class UsersService {
     }
   }
 
+  
 
   //load user by email
   async getUserByEmail(email: string) {
@@ -378,6 +378,25 @@ export class UsersService {
           through: { attributes: [] },
           association: 'favoriteComments',
           attributes: ['id']
+        }
+      ]
+    })
+
+    if (!user) {
+      throw new HttpException('Данный пользователь не найден', HttpStatus.NOT_FOUND)
+    }
+
+    return user
+  }
+
+  //load user roles by userId
+  async loadUserRolesByUserId(userId: number) {
+    const user = await this.userRepository.findByPk(userId, {
+      include: [
+        {
+          through: { attributes: [] },
+          association: 'roles',
+          attributes: ['id', 'value']
         }
       ]
     })

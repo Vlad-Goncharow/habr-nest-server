@@ -5,10 +5,12 @@ import { User } from 'src/users/users.model';
 import { CommentsModel } from './comments.model';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UserFavoriteComments } from 'src/users/user-favorite-comments.model';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class CommentsService {
-  constructor(@InjectModel(CommentsModel) private commentsRepository: typeof CommentsModel) {}
+  constructor(@InjectModel(CommentsModel) private commentsRepository: typeof CommentsModel,
+                                          private usersService: UsersService) {}
 
   //create comment
   async createComment(postId: number, userId:number, CreateCommentDto: CreateCommentDto){
@@ -37,7 +39,8 @@ export class CommentsService {
           as: 'author',
           attributes: ['id', 'avatar', 'nickname'],
         }
-      ]
+      ],
+      order: [['createdAt', 'asc']]
     })
 
     return comments
@@ -46,8 +49,17 @@ export class CommentsService {
   //delete comment
   async deleteCommentByCommentId(commentId:number, userId:number) {
     const data = await this.commentsRepository.findByPk(commentId)
-    
-    if(data && data.userId === userId){
+    const isUserHasRoles = await this.checkUserRoles(userId)
+
+    if (!isUserHasRoles){
+      throw new HttpException('Нет доступа', HttpStatus.FORBIDDEN)
+    }
+
+    if(!data){
+      throw new HttpException('Такой коментарий не найден', HttpStatus.NOT_FOUND)
+    }
+
+    if (data.userId === userId || isUserHasRoles){
       const favorites = await UserFavoriteComments.findAll({ where: { commentId } });
       const favoriteDeletions = favorites.map(favorite => favorite.destroy());
 
@@ -56,8 +68,6 @@ export class CommentsService {
       await data.destroy();
 
       return { success: true };
-    } else{
-      throw new HttpException('Такой коментарий не найден', HttpStatus.NOT_FOUND)
     }
   }
 
@@ -116,5 +126,17 @@ export class CommentsService {
       comments: rows,
       length: count
     };
+  }
+
+  //check user roles | admin | moderator
+  async checkUserRoles(userId: number) {
+    const user = await this.usersService.loadUserRolesByUserId(userId)
+
+    if (user.roles.some(el => el.value === 'ADMIN' || el.value === 'MODERATOR')) {
+      console.log('user.roles', user.roles);
+      return true
+    } else {
+      false
+    }
   }
 }
