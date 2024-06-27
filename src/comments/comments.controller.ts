@@ -37,18 +37,15 @@ export class CommentsController {
 
   //delete comment
   @ApiOperation({ summary: "delete comment" })
-  // @Roles('ADMIN')
-  // @UseGuards(RolesGuard)
   @UseGuards(JwtAuthGuard)
-  @Delete('/delete/:commentdId')
+  @Delete('/delete/:commentId')
   async deleteCommentByCommentId(
-    @Param('commentdId') commentdId: string,
+    @Param('commentId') commentId: number,
     @Req() req,
   ) {
     const { id } = req.user
-    return this.commentsService.deleteCommentByCommentId(Number(commentdId), id);
+    return this.commentsService.deleteCommentByCommentId(commentId, id);
   }
-
 
   //load all user comments
   @ApiOperation({ summary: "load all user comments" })
