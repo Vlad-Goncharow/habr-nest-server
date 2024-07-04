@@ -61,11 +61,14 @@ export class PostsController {
 
   //delete post
   @ApiOperation({ summary: 'delete post' })
-  @Roles('MODERATOR')
-  @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard)
   @Delete('/delete/:postId')
-  delePostById(@Param('postId') postId:string){
-    return this.postsService.delePostById(postId)
+  delePostById(
+    @Param('postId') postId:number,
+    @Req() req,
+  ){
+    const { id } = req.user
+    return this.postsService.delePostById(postId, id)
   }
 
 

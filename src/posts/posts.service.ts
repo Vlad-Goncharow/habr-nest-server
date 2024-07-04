@@ -7,12 +7,16 @@ import { HabsService } from 'src/habs/habs.service';
 import { User } from 'src/users/users.model';
 import { CreatePostDto } from './dto/create-post.dto';
 import { PostModel } from './posts.model';
+import { UsersService } from 'src/users/users.service';
+import { CommentsService } from 'src/comments/comments.service';
 
 @Injectable()
 export class PostsService {
 
   constructor(@InjectModel(PostModel) private postRepository: typeof PostModel,
-                                      private habsService:HabsService){}
+                                      private usersService: UsersService,
+                                      private habsService:HabsService,
+                                      private commentsService: CommentsService){}
 
   //create post                                 
   async create(dto: CreatePostDto) {
@@ -122,45 +126,25 @@ export class PostsService {
   }
 
   //delete post
-  async delePostById(postId:string){
-    //find post which need delete
-    const post = await this.postRepository.findByPk(postId,{
-      include: [Hab,]
-    })
-    //if post not found
-    if (!post) {
+  async delePostById(postId:number, userId:number){
+    const post = await this.postRepository.findByPk(postId)
+    const isUserHasRoles = await this.usersService.checkUserRoles(userId)
+
+    if(!post){
       throw new HttpException('Такого поста не существует', HttpStatus.NOT_FOUND)
     }
-    //habs with which the post was created
-    const habsIds = post.habs.map((el: Hab) => el.id)
-    //deleting an author in the hab if the count of his posts in the hab = 1
-    for(const habId of habsIds){
-      const data = await PostModel.findAndCountAll({
-        include: [
-          {
-            model: Hab,
-            where: {
-              id: habId,
-            },
-          },
-          {
-            model: User,
-            where: {
-              id: post.userId,
-            },
-          },
-        ],
-      });
 
-      if(data.count === 1){
-        await this.habsService.deleteAuthorInHabAuthors(post.userId, habId)
+    if(post.userId === userId || isUserHasRoles){
+      await this.commentsService.deleteAllCommentsByPostId(postId)
+      post.destroy()
+
+      return {
+        success: true
       }
     }
-    //delete post
-    post.destroy()
 
-    return {
-      success:true
+    if (!isUserHasRoles) {
+      throw new HttpException('Нет доступа', HttpStatus.FORBIDDEN)
     }
   }
 
