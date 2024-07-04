@@ -389,8 +389,8 @@ export class UsersService {
     return user
   }
 
-  //load user roles by userId
-  async loadUserRolesByUserId(userId: number) {
+  //check user roles | admin | moderator
+  async checkUserRoles(userId: number) {
     const user = await this.userRepository.findByPk(userId, {
       include: [
         {
@@ -405,6 +405,10 @@ export class UsersService {
       throw new HttpException('Данный пользователь не найден', HttpStatus.NOT_FOUND)
     }
 
-    return user
+    if (user.roles.some(el => el.value === 'ADMIN' || el.value === 'MODERATOR')) {
+      return true
+    } else {
+      false
+    }
   }
 }

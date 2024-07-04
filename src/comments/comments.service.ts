@@ -49,11 +49,7 @@ export class CommentsService {
   //delete comment
   async deleteCommentByCommentId(commentId:number, userId:number) {
     const data = await this.commentsRepository.findByPk(commentId)
-    const isUserHasRoles = await this.checkUserRoles(userId)
-
-    if (!isUserHasRoles){
-      throw new HttpException('Нет доступа', HttpStatus.FORBIDDEN)
-    }
+    const isUserHasRoles = await this.usersService.checkUserRoles(userId)
 
     if(!data){
       throw new HttpException('Такой коментарий не найден', HttpStatus.NOT_FOUND)
@@ -68,6 +64,10 @@ export class CommentsService {
       await data.destroy();
 
       return { success: true };
+    }
+
+    if (!isUserHasRoles) {
+      throw new HttpException('Нет доступа', HttpStatus.FORBIDDEN)
     }
   }
 
@@ -128,15 +128,23 @@ export class CommentsService {
     };
   }
 
-  //check user roles | admin | moderator
-  async checkUserRoles(userId: number) {
-    const user = await this.usersService.loadUserRolesByUserId(userId)
 
-    if (user.roles.some(el => el.value === 'ADMIN' || el.value === 'MODERATOR')) {
-      console.log('user.roles', user.roles);
-      return true
-    } else {
-      false
+  async deleteAllCommentsByPostId(postId:number){
+    const comments = await this.commentsRepository.findAll({
+      where:{postId}
+    })
+
+    if(!comments){
+      throw new HttpException('Такой коментарий не найден', HttpStatus.NOT_FOUND)
     }
+
+    const deleteFavoriteComments = comments.map(async (el) => {
+      const favorites = await UserFavoriteComments.findAll({ where: { commentId:el.id } });
+      const favoriteDeletions = favorites.map(favorite => favorite.destroy());
+
+      el.destroy()
+      await Promise.all(favoriteDeletions);
+    })
+    await Promise.all(deleteFavoriteComments);
   }
 }

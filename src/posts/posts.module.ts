@@ -10,12 +10,16 @@ import { PostsController } from './posts.controller';
 import { PostModel } from './posts.model';
 import { PostsService } from './posts.service';
 import { UserFavoritePosts } from 'src/users/user-favorite-posts.model';
+import { UsersModule } from 'src/users/users.module';
+import { CommentsModule } from 'src/comments/comments.module';
 
 @Module({
   controllers: [PostsController],
   providers: [PostsService],
   imports: [
     SequelizeModule.forFeature([User, PostModel, Hab, HabPosts, CommentsModel, UserFavoritePosts]),
+    UsersModule,
+    CommentsModule,
     HabsModule,
     AuthModule,
   ],
