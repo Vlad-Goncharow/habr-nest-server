@@ -13,7 +13,7 @@ export class UsersController {
   //add user role
   @ApiOperation({ summary: "add user role" })
   @Roles('ADMIN')
-  @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Post('/:userId/role/:roleId/add')
   addRole(@Param('userId') userId: string, @Param('roleId') roleId: string) {
     return this.usersService.addRole(userId, roleId)
