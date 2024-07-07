@@ -77,11 +77,14 @@ export class UsersService {
           as: 'subscribers',
           through: { attributes: [] },
           attributes: ['id'],
-        },
-        {
+        },{
           model: Hab,
           through: { attributes: [] },
           attributes: ['id']
+        }, {
+          model: Role,
+          through: { attributes: [] },
+          attributes: ['id','value','description']
         }
       ]
     })
