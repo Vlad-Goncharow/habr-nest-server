@@ -23,7 +23,9 @@ export class AuthService {
     }
 
     const hashPassword = await bcrypt.hash(userDto.password, 5)
-    const user = await this.userService.createUser({ ...userDto, password:hashPassword})
+
+    const createdUser = await this.userService.createUser({ ...userDto, password:hashPassword})
+    const user = await this.userService.loadCurrentUserById(createdUser.id)
 
     const accessToken = await this.generateToken(user)
     const refreshToken = await this.refreshTokenServie.generateRefreshToken(user)
@@ -93,8 +95,8 @@ export class AuthService {
   }
 
   async profileUpdate(id: number, dto: UpdateProfileDto){
-    const data = await this.userService.updateProfile(id, dto)
-    const user = await this.userService.loadCurrentUserById(data[0])
+    await this.userService.updateProfile(id, dto)
+    const user = await this.userService.loadCurrentUserById(id)
     
     return user
   }
