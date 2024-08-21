@@ -27,18 +27,7 @@ export class UsersService {
     await user.$set('roles', [role.id]);
     user.roles = [role];
 
-    const userWithoutPassword = await this.userRepository.findByPk(user.id, {
-      include: [
-        {
-          model: Role,
-          through: { attributes: [] },
-          attributes: ['id', 'value', 'description', 'createdAt', 'updatedAt'],
-        },
-      ],
-      attributes: { exclude: ['password'] },
-    });
-
-    return userWithoutPassword;
+    return user;
   }
 
   //add user new role
@@ -48,7 +37,7 @@ export class UsersService {
 
     if (role && user) {
       await user.$add('role', role.id)
-      return role
+      return {success:true}
     }
 
     throw new HttpException('Пользователь или роль не найдены', HttpStatus.NOT_FOUND)
@@ -61,7 +50,7 @@ export class UsersService {
 
     if (role && user) {
       await user.$remove('role', role.id)
-      return role
+      return { success: true }
     }
 
     throw new HttpException('Пользователь или роль не найдены', HttpStatus.NOT_FOUND)
