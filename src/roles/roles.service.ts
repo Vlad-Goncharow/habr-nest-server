@@ -27,7 +27,7 @@ export class RolesService {
   }
 
   //load role by id
-  async getRoleById(roleId:string){
+  async getRoleById(roleId:number){
     const role = await this.roleRepository.findByPk(roleId)
 
     if (!role) {

@@ -35,7 +35,7 @@ export class User extends Model<User, UserCreationAttrs> {
   nickname: string;
   
   @ApiProperty({ example: 'avatar.jpg', description: 'Автар пользователя' })
-  @Column({ type: DataType.STRING, defaultValue: '/user_alt.jpg' })
+  @Column({ type: DataType.STRING, defaultValue: 'user_alt.png' })
   avatar: string;
   
   @ApiProperty({ example: '0', description: 'Карма пользователя' })

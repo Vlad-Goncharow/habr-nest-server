@@ -30,7 +30,8 @@ import { UserFavoriteComments } from './users/user-favorite-comments.model';
   imports: [
     ConfigModule.forRoot({envFilePath:`.env.${process.env.NODE_ENV}`}),
     ServeStaticModule.forRoot({
-      rootPath: path.join(__dirname, "../uploads")
+      rootPath: path.join(__dirname, "../uploads"),
+      serveRoot: '/uploads',
     }),
     SequelizeModule.forRoot({
       dialect: 'postgres',

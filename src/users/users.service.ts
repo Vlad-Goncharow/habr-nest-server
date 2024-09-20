@@ -31,7 +31,7 @@ export class UsersService {
   }
 
   //add user new role
-  async addRole(userId: string, roleId: string) {
+  async addRole(userId: number, roleId: number) {
     const user = await this.userRepository.findByPk(userId)
     const role = await this.roleService.getRoleById(roleId)
 
@@ -44,7 +44,7 @@ export class UsersService {
   }
 
   //remove user role
-  async removeRole(userId:string, roleId:string) {
+  async removeRole(userId:number, roleId:number) {
     const user = await this.userRepository.findByPk(userId)
     const role = await this.roleService.getRoleById(roleId)
 
