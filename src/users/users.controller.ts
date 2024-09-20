@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Controller, Delete, Get, Param, ParseIntPipe, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Roles } from 'src/auth/roles-auth.decorator';
 import { RolesGuard } from 'src/auth/roles.guard';
@@ -15,7 +15,10 @@ export class UsersController {
   @Roles('ADMIN')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Post('/:userId/role/:roleId/add')
-  addRole(@Param('userId') userId: string, @Param('roleId') roleId: string) {
+  addRole(
+    @Param('userId', ParseIntPipe) userId: number, 
+    @Param('roleId',ParseIntPipe) roleId: number
+  ) {
     return this.usersService.addRole(userId, roleId)
   }
 
@@ -25,7 +28,10 @@ export class UsersController {
   @Roles('ADMIN')
   @UseGuards(RolesGuard)
   @Post('/:userId/role/:roleId/remove')
-  removeRole(@Param('userId') userId:string, @Param('roleId') roleId:string) {
+  removeRole(
+    @Param('userId', ParseIntPipe) userId: number, 
+    @Param('roleId',ParseIntPipe) roleId: number
+  ) {
     return this.usersService.removeRole(userId, roleId)
   }
 
@@ -33,8 +39,8 @@ export class UsersController {
   //load user by id
   @ApiOperation({ summary: "load user by id" })
   @Get('/:userId')
-  async getUserById(@Param('userId') userId: string) {
-    return this.usersService.getUserById(Number(userId))
+  async getUserById(@Param('userId', ParseIntPipe) userId: number) {
+    return this.usersService.getUserById(userId)
   }
 
 
@@ -42,9 +48,9 @@ export class UsersController {
   @ApiOperation({ summary: "subscribe" })
   @UseGuards(JwtAuthGuard)
   @Post('/subscribe/:userId')
-  async subscribe(@Req() req, @Param('userId') userId: string) {
+  async subscribe(@Req() req, @Param('userId', ParseIntPipe) userId: number) {
     const {id} = req.user
-    return this.usersService.subscribe(id, Number(userId))
+    return this.usersService.subscribe(id, userId)
   }
 
 
@@ -52,9 +58,9 @@ export class UsersController {
   @ApiOperation({ summary: "unsubscribe" })
   @UseGuards(JwtAuthGuard)
   @Post('/unsubscribe/:userId')
-  async unSubscribe(@Req() req, @Param('userId') userId: string) {
+  async unSubscribe(@Req() req, @Param('userId', ParseIntPipe) userId: number) {
     const { id } = req.user
-    return this.usersService.unSubscribe(id, Number(userId))
+    return this.usersService.unSubscribe(id, userId)
   }
 
 
@@ -62,12 +68,12 @@ export class UsersController {
   @ApiOperation({ summary: "load user subs" })
   @Get('/subs/:userId/:type')
   async loadUserSubs(
-    @Param('userId') userId: string,
+    @Param('userId', ParseIntPipe) userId: number,
     @Param('type') type: string,
     @Query('page') page: number,
     @Query('pageSize') pageSize: number,
   ) {
-    return this.usersService.loadUserSubs(Number(userId), type, Number(page), Number(pageSize))
+    return this.usersService.loadUserSubs(userId, type, Number(page), Number(pageSize))
   }
 
 
@@ -94,10 +100,10 @@ export class UsersController {
   addFavoritePost
     (
       @Req() req,
-      @Param('postId') postId: string,
+      @Param('postId', ParseIntPipe) postId: number,
     ) {
     const { id } = req.user
-    return this.usersService.addFavoritePost(Number(id), Number(postId))
+    return this.usersService.addFavoritePost(Number(id), postId)
   }
 
 
@@ -108,10 +114,10 @@ export class UsersController {
   removeFavoritePost
     (
       @Req() req,
-      @Param('postId') postId: string,
+      @Param('postId', ParseIntPipe) postId: number
     ) {
     const { id } = req.user
-    return this.usersService.removeFavoritePost(Number(id), Number(postId))
+    return this.usersService.removeFavoritePost(Number(id), postId)
   }
 
 
@@ -122,7 +128,7 @@ export class UsersController {
   addFavoriteComment
     (
       @Req() req,
-      @Param('commentId') commentId: number,
+      @Param('commentId', ParseIntPipe) commentId: number
     ) {
     const { id } = req.user
     return this.usersService.addFavoriteComment(Number(id), commentId)
@@ -136,7 +142,7 @@ export class UsersController {
   removeFavoriteComment
     (
       @Req() req,
-      @Param('commentId') commentId: number,
+      @Param('commentId', ParseIntPipe) commentId: number
     ) {
     const { id } = req.user
     return this.usersService.removeFavoriteComment(Number(id), commentId)

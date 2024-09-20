@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { Roles } from 'src/auth/roles-auth.decorator';
@@ -24,7 +24,7 @@ export class PostsController {
   //load single post
   @ApiOperation({summary:'load single post'})
   @Get('/:postId')
-  loadPostById(@Param('postId') postId:number){
+  loadPostById(@Param('postId', ParseIntPipe) postId: number){
     return this.postsService.loadPostById(postId)
   }
 
@@ -64,7 +64,7 @@ export class PostsController {
   @UseGuards(JwtAuthGuard)
   @Delete('/delete/:postId')
   delePostById(
-    @Param('postId') postId:number,
+    @Param('postId', ParseIntPipe) postId: number,
     @Req() req,
   ){
     const { id } = req.user
@@ -76,11 +76,11 @@ export class PostsController {
   @ApiOperation({ summary: 'load user posts' })
   @Get('/user/:userId/:type')
   loadUserPosts(
-    @Param('userId') userId: string,
+    @Param('userId', ParseIntPipe) userId: number,
     @Param('type') type: string,
     @Query('page') page: number,
     @Query('pageSize') pageSize: number,) {
-    return this.postsService.loadUserPosts(Number(userId), type, Number(page), Number(pageSize))
+    return this.postsService.loadUserPosts(userId, type, Number(page), Number(pageSize))
   }
 
 
@@ -88,11 +88,11 @@ export class PostsController {
   @ApiOperation({ summary: 'load hab posts' })
   @Get('/hab/:habId/:type')
   loadHabPosts(
-    @Param('habId') habId: string,
+    @Param('habId', ParseIntPipe) habId: number,
     @Param('type') type: string,
     @Query('page') page: number,
     @Query('pageSize') pageSize: number,) {
-    return this.postsService.loadHabPosts(Number(habId), type, Number(page), Number(pageSize))
+    return this.postsService.loadHabPosts(habId, type, Number(page), Number(pageSize))
   }
 
 
@@ -102,7 +102,7 @@ export class PostsController {
   loadUserFavoritesPosts
     (
       @Param('type') type: string,
-      @Param('userId') userId: number,
+      @Param('userId', ParseIntPipe) userId: number,
       @Query('page') page: number,
       @Query('pageSize') pageSize: number,
     ) {

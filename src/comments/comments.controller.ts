@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateCommentDto } from './dto/create-comment.dto';
@@ -18,10 +18,10 @@ export class CommentsController {
   async createComment(
     @Req() req,
     @Body() CreateCommentDto:CreateCommentDto,
-    @Param('postId') postId: string,
+    @Param('postId', ParseIntPipe) postId: number
   ) {
     const { id } = req.user
-    return this.commentsService.createComment(Number(postId), id, CreateCommentDto);
+    return this.commentsService.createComment(postId, id, CreateCommentDto);
   }
 
 
@@ -29,9 +29,9 @@ export class CommentsController {
   @ApiOperation({ summary: "load comments by postId" })
   @Get('/load/:postId')
   async loadCommentsByPostId(
-    @Param('postId') postId: string,
+    @Param('postId', ParseIntPipe) postId: number
   ) {
-    return this.commentsService.loadCommentsByPostId(Number(postId));
+    return this.commentsService.loadCommentsByPostId(postId);
   }
 
 
@@ -40,7 +40,7 @@ export class CommentsController {
   @UseGuards(JwtAuthGuard)
   @Delete('/delete/:commentId')
   async deleteCommentByCommentId(
-    @Param('commentId') commentId: number,
+    @Param('commentId', ParseIntPipe) commentId: number,
     @Req() req,
   ) {
     const { id } = req.user
@@ -51,10 +51,10 @@ export class CommentsController {
   @ApiOperation({ summary: "load all user comments" })
   @Get('/user/:userId')
   async loadCommentsByUserId(
-    @Param('userId') userId: string,
+    @Param('userId', ParseIntPipe) userId: number,
     @Query('page') page: number,
     @Query('pageSize') pageSize: number,   ) {
-    return this.commentsService.loadCommentsByUserId(Number(userId), page, pageSize);
+    return this.commentsService.loadCommentsByUserId(userId, page, pageSize);
   }
 
 
@@ -63,7 +63,7 @@ export class CommentsController {
   @Get('/favorites/:userId')
   loadUserFavoritesComments
     (
-      @Param('userId') userId: number,
+      @Param('userId', ParseIntPipe) userId: number,
       @Query('page') page: number,
       @Query('pageSize') pageSize: number,
     ) {

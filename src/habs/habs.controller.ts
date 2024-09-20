@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { Roles } from 'src/auth/roles-auth.decorator';
@@ -25,10 +25,9 @@ export class HabsController {
   //load single hab data
   @ApiOperation({ summary: "load single hab data" })
   @Get('/:id')
-  loadHabById(@Param('id') id: string){
-    return this.habsService.loadHabById(Number(id))
+  async loadHabById(@Param('id', ParseIntPipe) id: number) {
+    return this.habsService.loadHabById(id);
   }
-
   
   //load habs by category | title, main page, search page
   @ApiOperation({ summary: "load habs by category | title, main page, search page" })
@@ -50,7 +49,7 @@ export class HabsController {
   @Get('/load/:id/authors')
   loadHabAuthors
   (
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Query('sort') sort: string,
     @Query('order') order: string,
     @Query('page') page: number,
@@ -81,8 +80,8 @@ export class HabsController {
   //load hubs subscribed to by the user
   @ApiOperation({ summary: "load hubs subscribed to by the user" })
   @Get('/user/:userId/subscribed-habs')
-  async loadUserHabs(@Param('userId') userId: string) {
-    return this.habsService.loadUserHabs(Number(userId))
+  async loadUserHabs(@Param('userId', ParseIntPipe) userId: number) {
+    return this.habsService.loadUserHabs(userId)
   }
 
 

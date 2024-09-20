@@ -33,7 +33,7 @@ export class HabsService {
 
   //load single hab data
   async loadHabById(id:number){
-    const hab = await this.habRepository.findByPk(Number(id))
+    const hab = await this.habRepository.findByPk(id)
 
     return hab
   }
@@ -76,7 +76,7 @@ export class HabsService {
   }
 
   //load hab authors
-  async loadHabAuthors(id:string,sort:string, order:string, page:number, pageSize:number){
+  async loadHabAuthors(id:number,sort:string, order:string, page:number, pageSize:number){
     const offset = (page - 1) * pageSize;
 
     let myOrder = [];
