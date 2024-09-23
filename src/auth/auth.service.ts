@@ -18,8 +18,12 @@ export class AuthService {
     const candidateEmail = await this.userService.getUserByEmail(userDto.email)
     const candidateNickname = await this.userService.getUserByNickname(userDto.nickname)
 
-    if (candidateEmail || candidateNickname){
-      throw new HttpException({ message: 'Данная почта или ник заняты', param:['email','nickname']}, HttpStatus.BAD_REQUEST)
+    if (candidateEmail){
+      throw new HttpException({ message: 'Данная почта занята', param:'email'}, HttpStatus.BAD_REQUEST)
+    }
+
+    if (candidateNickname){
+      throw new HttpException({ message: 'Данная ник занят', param:'nickname'}, HttpStatus.BAD_REQUEST)
     }
 
     const hashPassword = await bcrypt.hash(userDto.password, 5)
