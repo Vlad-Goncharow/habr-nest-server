@@ -25,6 +25,10 @@ export class User extends Model<User, UserCreationAttrs> {
   @ApiProperty({ example: 'example@gmail.com', description: 'Почта пользователя' })
   @Column({ type: DataType.STRING, unique: true, allowNull: false })
   email: string;
+
+  @ApiProperty({ example: 'false', description: 'Активирована ли почта' })
+  @Column({ type: DataType.BOOLEAN, allowNull: false,  defaultValue:false })
+  isActive: boolean;
   
   @ApiProperty({ example: 'example', description: 'Пароль пользователя' })
   @Column({ type: DataType.STRING, allowNull: false })
@@ -71,12 +75,18 @@ export class User extends Model<User, UserCreationAttrs> {
   roles: Role[]
   
   @ApiProperty({ description: "Посты пользователя", type: () => [PostModel] })
-  @HasMany(() => PostModel)
+  @HasMany(() => PostModel, {
+    onDelete: 'CASCADE', 
+    hooks: true
+  })
   posts: PostModel[];
 
   @ApiProperty({ description: "Коментарии пользователя", type: () => [CommentsModel] })
-  @HasMany(() => CommentsModel)
-  comments: CommentsModel[];
+  @HasMany(() => CommentsModel, {
+    onDelete: 'CASCADE', 
+    hooks: true
+  })
+  comments: CommentsModel[]
 
   @ApiProperty({ description: "Подписки на хабы пользователя", type: () => [HabSubscribers] })
   @BelongsToMany(() => Hab, () => HabSubscribers)

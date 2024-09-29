@@ -24,10 +24,36 @@ import { CommentsModel } from './comments/comments.model';
 import { FilesModule } from './files/files.module';
 import { UserFavoritePosts } from './users/user-favorite-posts.model';
 import { UserFavoriteComments } from './users/user-favorite-comments.model';
+
+import { MailerModule } from '@nestjs-modules/mailer';
+import { EjsAdapter } from '@nestjs-modules/mailer/dist/adapters/ejs.adapter';
+import { MailModule } from './mail/mail.module';
+
 @Module({
   controllers: [],
   providers: [],
   imports: [
+    MailerModule.forRoot({
+      transport: {
+        host: 'smtp.gmail.com',
+        port: 465, 
+        secure: true,
+        auth: {
+          user: "vladuska159@gmail.com",
+          pass: "tcxf djtt frpv rasp",
+        },
+      },
+      defaults: {
+        from:'"nest-modules" <vladuska159@gmail.com>',
+      },
+      template: {
+        dir: path.join(__dirname, '..', 'src', 'templates'),
+        adapter: new EjsAdapter(), 
+        options: {
+          strict: true,
+        },
+      },
+    }),
     ConfigModule.forRoot({envFilePath:`.env.${process.env.NODE_ENV}`}),
     ServeStaticModule.forRoot({
       rootPath: path.join(__dirname, "../uploads"),
@@ -51,6 +77,7 @@ import { UserFavoriteComments } from './users/user-favorite-comments.model';
     PostsModule,
     HabsModule,
     CommentsModule,
+    MailModule,
   ],
 })
 export class AppModule {}

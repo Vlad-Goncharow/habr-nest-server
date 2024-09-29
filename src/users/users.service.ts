@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Op } from 'sequelize';
 import { UpdateProfileDto } from 'src/auth/dto/UpdateProfileDto';
@@ -58,31 +58,35 @@ export class UsersService {
 
   //load user by id
   async getUserById(userId: number) {
-    const user = await this.userRepository.findByPk(userId, {
-      attributes: { exclude: ['password'] },
-      include: [
-        {
-          model: User,
-          as: 'subscribers',
-          through: { attributes: [] },
-          attributes: ['id'],
-        },{
-          model: Hab,
-          through: { attributes: [] },
-          attributes: ['id']
-        }, {
-          model: Role,
-          through: { attributes: [] },
-          attributes: ['id','value','description']
-        }
-      ]
-    })
+    try{
+      const user = await this.userRepository.findByPk(userId, {
+        attributes: { exclude: ['password'] },
+        include: [
+          {
+            model: User,
+            as: 'subscribers',
+            through: { attributes: [] },
+            attributes: ['id'],
+          },{
+            model: Hab,
+            through: { attributes: [] },
+            attributes: ['id']
+          }, {
+            model: Role,
+            through: { attributes: [] },
+            attributes: ['id','value','description']
+          }
+        ]
+      })
 
-    if (!user) {
-      throw new HttpException('Данный пользователь не найден', HttpStatus.NOT_FOUND)
+      if (!user) {
+        throw new HttpException('Данный пользователь не найден', HttpStatus.NOT_FOUND)
+      }
+
+      return user
+    } catch(e){
+      throw e
     }
-
-    return user
   }
  
   //subscribe
@@ -401,6 +405,18 @@ export class UsersService {
       return true
     } else {
       false
+    }
+  }
+
+
+  //delete user
+  async deleteUser(userId:number){
+    try{
+      const user = await this.getUserById(userId)
+    
+      await user.destroy()
+    } catch (e) {
+      throw e;
     }
   }
 }

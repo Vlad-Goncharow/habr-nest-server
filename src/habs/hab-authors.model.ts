@@ -23,4 +23,9 @@ export class HabAuthors extends Model<HabAuthors> {
 
   @BelongsTo(() => User)
   user: User;
+
+  static associate() {
+    HabAuthors.belongsTo(User, { onDelete: 'CASCADE' });
+    HabAuthors.belongsTo(Hab, { onDelete: 'CASCADE' });
+  }
 }

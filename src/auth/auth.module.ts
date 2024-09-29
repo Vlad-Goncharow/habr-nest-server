@@ -5,6 +5,7 @@ import { UsersModule } from 'src/users/users.module';
 import { JwtModule } from '@nestjs/jwt';
 import { RefreshTokensService } from 'src/refresh-tokens/refresh-tokens.service';
 import { RefreshTokensModule } from 'src/refresh-tokens/refresh-tokens.module';
+import { MailModule } from 'src/mail/mail.module';
 
 @Module({
   controllers: [AuthController],
@@ -17,7 +18,8 @@ import { RefreshTokensModule } from 'src/refresh-tokens/refresh-tokens.module';
         expiresIn: '24h'
       }
     }),
-    RefreshTokensModule
+    RefreshTokensModule,
+    MailModule
   ],
   exports: [
     AuthService,
