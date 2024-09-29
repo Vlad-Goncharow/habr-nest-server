@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { UsersService } from 'src/users/users.service';
@@ -111,5 +111,25 @@ export class AuthService {
     const access = this.jwtService.sign(payload)
    
     return access
+  }
+
+  async deleteUser(tokenId: number, userId: number) {
+    try {
+      if (tokenId !== userId) {
+        throw new UnauthorizedException('Вы не можете удалить другого пользователя');
+      }
+
+      const user = await this.userService.getUserById(userId);
+      
+      await this.refreshTokenServie.deleteToken(user.id);
+      await this.userService.deleteUser(user.id);
+
+      return {
+        success: true,
+      };
+
+    } catch (e) {
+      throw e;
+    }
   }
 }

@@ -2,16 +2,22 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
-import { PostModel } from './posts/posts.model';
+import * as path from 'path';
+import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function Start() {
-  const PORT = process.env.PORT || 4445
+  const PORT = process.env.PORT || 4445;
 
-  const app = await NestFactory.create(AppModule, { cors: {
-    origin: true,
-    optionsSuccessStatus: 200,
-    credentials: true
-  }});
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    cors: {
+      origin: true,
+      optionsSuccessStatus: 200,
+      credentials: true,
+    },
+  });
+
+  app.setViewEngine('ejs');
+  app.setBaseViewsDir(path.join(__dirname, '..', 'src', 'templates'));
 
   const config = new DocumentBuilder()
     .setTitle('Habr server docs')

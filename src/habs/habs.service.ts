@@ -147,15 +147,6 @@ export class HabsService {
     }
   }
 
-  //delete single author in hab authors
-  async deleteAuthorInHabAuthors(userId: number, habId: number){
-    const hab = await this.loadHabById(habId)
-    
-    if(hab){
-      await hab.$remove('author', userId)
-    }
-  }
-
   //load hubs subscribed to by the user
   async loadUserHabs(userId: number) {
     const data = await this.habRepository.findAll({
@@ -231,5 +222,25 @@ export class HabsService {
     });
 
     return selectedHubs
+  }
+
+  async deleteHabPost(postId:number){
+    try{
+      await HabPosts.destroy({
+        where:{postId}
+      })
+    } catch(e){
+      throw e
+    }
+  }
+
+  async deleteHabAuthor(habId:number,userId:number){
+    try{
+      await HabAuthors.destroy({
+        where:{userId,habId}
+      })
+    } catch(e){
+      throw e
+    }
   }
 }

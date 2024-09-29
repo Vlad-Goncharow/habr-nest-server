@@ -127,7 +127,7 @@ export class PostsService {
 
   //delete post
   async delePostById(postId:number, userId:number){
-    const post = await this.postRepository.findByPk(postId)
+    const post = await this.loadPostById(postId)
     const isUserHasRoles = await this.usersService.checkUserRoles(userId)
 
     if(!post){
@@ -136,7 +136,17 @@ export class PostsService {
 
     if(post.userId === userId || isUserHasRoles){
       await this.commentsService.deleteAllCommentsByPostId(postId)
-      post.destroy()
+       post.habs.forEach(async hab => {
+        await this.habsService.deleteHabAuthor(hab.id,userId)
+      })
+
+      await post.destroy()
+
+     
+
+      // const favoriteDeletions = favorites.map(favorite => favorite.destroy());
+      // await Promise.all(favoriteDeletions);
+      // await this.habsService.deleteHabPost(postId)
 
       return {
         success: true

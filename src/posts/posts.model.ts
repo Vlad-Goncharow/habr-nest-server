@@ -61,7 +61,10 @@ export class PostModel extends Model<PostModel, PostCreationAttrs> {
   habs: Hab[];
 
   @ApiProperty({ description: "Комментарии поста", type: () => [CommentsModel] })
-  @HasMany(() => CommentsModel)
+  @HasMany(() => CommentsModel, {
+    onDelete: 'CASCADE', 
+    hooks: true
+  })
   comments: CommentsModel[];
 
   @ApiProperty({ description: "Избранные", type: () => [User] })

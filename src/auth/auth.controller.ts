@@ -1,15 +1,18 @@
-import { Body, Controller, Patch, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Render, Req, Res, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { UpdateProfileDto } from './dto/UpdateProfileDto';
+import { MailService } from 'src/mail/mail.service';
 
 @ApiTags('Авторизация')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService,
+    private readonly mailService: MailService
+  ) {}
 
   //Регистрация пользователя
   @ApiOperation({ summary: "Регистрация пользователя" })
@@ -23,12 +26,38 @@ export class AuthController {
       sameSite: 'none',
       secure: true
     })
+    this.mailService.sendMail(userData.user)
 
     return res.json({
       ...userData,
     })
   }
-  
+
+  //Повторная отправка письма для подтверждения почты
+  @ApiOperation({ summary: "Повторная отправка письма для подтверждения почты" })
+  @UseGuards(JwtAuthGuard)
+  @Post('/send/verify/:userId')
+  async sendVerify(@Req() req, ) {
+    const user = req.user
+    const data = await this.mailService.sendMail(user)
+    
+    return {
+      ...data 
+    };
+  }
+
+  //Подтверждение почты
+  @ApiOperation({ summary: "Подтверждение почты" })
+  @Render('confirmEmail')
+  @Get('/confirm/:userId')
+  async confirmEmail(
+    @Param('userId', ParseIntPipe) userId: number
+  ) {
+    const data = await this.mailService.verifyMail(userId)
+    return {
+      success: data.success, 
+    };
+  }
 
   //Авторизация пользователя
   @ApiOperation({ summary: "Авторизация пользователя" })
@@ -92,5 +121,19 @@ export class AuthController {
     const userData = await this.authService.profileUpdate(id, dto)
 
     res.json(userData)
+  }
+
+  //Удаление пользователя
+  @ApiOperation({ summary: "Удаление пользователя" })
+  @UseGuards(JwtAuthGuard)
+  @Delete('/:userId')
+  async deleteUser(@Req() req, @Res() res: Response, @Param('userId', ParseIntPipe) userId: number) {
+    const {id} = req.user
+
+    const data = await this.authService.deleteUser(id, userId)
+    res.cookie('refreshToken', '',)
+    res.json({
+      ...data
+    })
   }
 }

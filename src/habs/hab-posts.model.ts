@@ -26,4 +26,9 @@ export class HabPosts extends Model<HabPosts>{
 
   @BelongsTo(() => Hab)
   hab: Hab;
+
+  static associate() {
+    HabPosts.belongsTo(PostModel, { onDelete: 'CASCADE' });
+    HabPosts.belongsTo(Hab, { onDelete: 'CASCADE' });
+  }
 }
