@@ -24,10 +24,15 @@ async function Start() {
     .setDescription('I choose learn nest/ this my docs on habr server clone')
     .setVersion('1.0.0')
     .addTag('habr')
+    .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('/api/docs', app, document);
+  SwaggerModule.setup('/api/docs', app, document, {
+  swaggerOptions: {
+    persistAuthorization: true, 
+  },
+});
   app.use(cookieParser());
   await app.listen(PORT, () => console.log(`Server start on port - ${PORT}`));
 }

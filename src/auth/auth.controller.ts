@@ -1,101 +1,71 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Render, Req, Res, UseGuards } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Delete, Get, Inject, Param, ParseIntPipe, Patch, Post, Render, Req, Res, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
-import { AuthService } from './auth.service';
-import { JwtAuthGuard } from './jwt-auth.guard';
+import { User } from 'src/users/users.model';
+import { LoginDto } from './dto/LoginDto';
 import { UpdateProfileDto } from './dto/UpdateProfileDto';
-import { MailService } from 'src/mail/mail.service';
+import { JwtAuthGuard } from './jwt-auth.guard';
+import { AuthUtilService } from './types';
 
 @ApiTags('Авторизация')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService,
-    private readonly mailService: MailService
+  constructor(
+    @Inject('AUTH_UTIL_SERVICE') private readonly authService: AuthUtilService,
   ) {}
 
-  //Регистрация пользователя
-  @ApiOperation({ summary: "Регистрация пользователя" })
-  @Post('/registration')
-  async registration(@Res() res:Response, @Body() dto: CreateUserDto) {
-    const userData = await this.authService.registration(dto);
-
-    res.cookie('refreshToken', userData.refreshToken, {
-      maxAge: 30 * 24 * 60 * 60 * 1000,
-      httpOnly: true,
-      sameSite: 'none',
-      secure: true
-    })
-    this.mailService.sendMail(userData.user)
-
-    return res.json({
-      ...userData,
-    })
+  @ApiOperation({ summary: 'Регистрация нового пользователя' })
+  @ApiResponse({ status: 201, description: 'Пользователь успешно зарегистрирован', type: User }) 
+  @ApiResponse({ status: 400, description: 'Некорректные данные' }) 
+  @Post('registration')
+  async registration(@Res() res: Response, @Body() dto: CreateUserDto) {
+    const { cookies, result } = await this.authService.registration(dto);
+    res.cookie('refreshToken', cookies.refreshToken, cookies.options);
+    return res.json({...result});
   }
 
-  //Повторная отправка письма для подтверждения почты
+
+  @ApiOperation({ summary: "Авторизация пользователя" })
+  @Post('/login')
+  async login(@Res() res: Response , @Body() dto: LoginDto) {
+    const { cookies, result } = await this.authService.login(dto);
+    res.cookie('refreshToken', cookies.refreshToken, cookies.options);
+    return res.json({...result});
+  }
+
+
   @ApiOperation({ summary: "Повторная отправка письма для подтверждения почты" })
   @UseGuards(JwtAuthGuard)
   @Post('/send/verify/:userId')
-  async sendVerify(@Req() req, ) {
+  async resendVerification(@Req() req) {
     const user = req.user
-    const data = await this.mailService.sendMail(user)
+    const data = await this.authService.resendVerification(user)
     
     return {
       ...data 
     };
   }
 
-  //Подтверждение почты
   @ApiOperation({ summary: "Подтверждение почты" })
   @Render('confirmEmail')
   @Get('/confirm/:userId')
-  async confirmEmail(
-    @Param('userId', ParseIntPipe) userId: number
-  ) {
-    const data = await this.mailService.verifyMail(userId)
+  async confirmEmail(@Param('userId', ParseIntPipe) userId: number ) {
+    const data = await this.authService.confirmEmail(userId)
     return {
       success: data.success, 
     };
   }
 
-  //Авторизация пользователя
-  @ApiOperation({ summary: "Авторизация пользователя" })
-  @Post('/login')
-  async login(@Res() res: Response , @Body() dto: CreateUserDto) {
-    const userData = await this.authService.login(dto)
-
-    res.cookie('refreshToken', userData.refreshToken, {
-      maxAge: 30 * 24 * 60 * 60 * 1000,
-      httpOnly: true,
-      sameSite: 'none',
-      secure: true
-    })
-
-    return res.json({
-      ...userData,
-    })
-  }
-
-
   //Обновление токена
   @ApiOperation({ summary: "Обновление токена" })
   @Post('/refresh')
   async refresh(@Req() req: Request, @Res() res: Response) {
-    const { refreshToken } = req.cookies
+    const {refreshToken} = req.cookies
 
-    const userData = await this.authService.refresh(refreshToken)
-
-    res.cookie('refreshToken', userData.refreshToken, {
-      maxAge: 30 * 24 * 60 * 60 * 1000,
-      httpOnly: true,
-      sameSite: 'none',
-      secure: true
-    })
-
-    return res.json({
-      ...userData,
-    })
+    const { cookies, result } = await this.authService.refresh(refreshToken);
+    res.cookie('refreshToken', cookies.refreshToken, cookies.options);
+    return res.json({...result});
   }
 
   //Выход
@@ -113,6 +83,7 @@ export class AuthController {
 
   //Обновление профиля
   @ApiOperation({ summary: "Обновление профиля" })
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Patch('/profile-update')
   async profileUpdate(@Req() req, @Body() dto: UpdateProfileDto, @Res() res: Response) {
@@ -125,6 +96,7 @@ export class AuthController {
 
   //Удаление пользователя
   @ApiOperation({ summary: "Удаление пользователя" })
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Delete('/:userId')
   async deleteUser(@Req() req, @Res() res: Response, @Param('userId', ParseIntPipe) userId: number) {
@@ -132,8 +104,7 @@ export class AuthController {
 
     const data = await this.authService.deleteUser(id, userId)
     res.cookie('refreshToken', '',)
-    res.json({
-      ...data
-    })
+
+    return res.json({...data})
   }
 }
