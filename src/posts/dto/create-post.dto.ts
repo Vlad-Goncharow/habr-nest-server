@@ -14,10 +14,6 @@ export class CreatePostDto {
   @IsString({ message: 'Должно быть строкой' })
   readonly content: string
 
-  @ApiProperty({ example: 'example', description: 'id пользователя' })
-  @IsString({ message: 'Должно быть строкой' })
-  readonly userId: string
-
   @ApiProperty({ example: 'develop', description: 'Категории поста' })
   @IsString({ message: 'Должно быть строкой' })
   readonly category: string
@@ -26,6 +22,6 @@ export class CreatePostDto {
   @IsString({ message: 'Должно быть строкой' })
   readonly type: string
 
-  @ApiProperty({ example: 'example', description: 'Текст поста' })
+  @ApiProperty({ example: [1,2], description: 'Текст поста' })
   readonly habs: number[]
 }
