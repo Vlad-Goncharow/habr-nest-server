@@ -1,44 +1,40 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/sequelize';
-import sequelize, { Op } from 'sequelize';
-import { CommentsModel } from 'src/comments/comments.model';
-import { Hab } from 'src/habs/habs.model';
-import { HabsService } from 'src/habs/habs.service';
-import { User } from 'src/users/users.model';
-import { CreatePostDto } from './dto/create-post.dto';
-import { PostModel } from './posts.model';
-import { UsersService } from 'src/users/users.service';
-import { CommentsService } from 'src/comments/comments.service';
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
+import { InjectModel } from "@nestjs/sequelize";
+import sequelize, { Op } from "sequelize";
+import { CommentsModel } from "src/comments/comments.model";
+import { CommentsService } from "src/comments/comments.service";
+import { Hab } from "src/habs/habs.model";
+import { HabsService } from "src/habs/habs.service";
+import { User } from "src/users/users.model";
+import { UsersService } from "src/users/users.service";
+import { CreatePostDto } from "./dto/create-post.dto";
+import { PostModel } from "./posts.model";
+import { PostsUtilService } from "./types";
 
 @Injectable()
-export class PostsService {
+export class PostsRealService implements PostsUtilService {
+  constructor(
+    @InjectModel(PostModel) private postRepository: typeof PostModel, 
+    private usersService: UsersService,
+    private habsService: HabsService,
+    private commentsService: CommentsService, 
+  ) {}
 
-  constructor(@InjectModel(PostModel) private postRepository: typeof PostModel,
-                                      private usersService: UsersService,
-                                      private habsService:HabsService,
-                                      private commentsService: CommentsService){}
-
-  //create post                                 
-  async create(dto: CreatePostDto) {
-    //create post & get habs by ids
-    const post = await this.postRepository.create({ ...dto});
+  async createPost(dto: CreatePostDto,userId:any): Promise<any> {
+    const post = await this.postRepository.create({ ...dto, userId});
     const habs = await this.habsService.getHabs(dto.habs);
 
-    //add habs in post
     await post.$add('habs', habs);
 
-    //add post&user in hab (posts, authors)
     for (const hab of habs) {
       await hab.$add('posts', post);
-      await hab.$add('authors', dto.userId);
+      await hab.$add('authors', userId);
     }
 
-    //return post, in front navigate to post page by postID
     return post
   }
 
-  //load single post
-  async loadPostById(postId:number){
+  async loadPostById(postId: number): Promise<any> {
     const post = await this.postRepository.findByPk(postId, {
       include:[
         {
@@ -72,7 +68,101 @@ export class PostsService {
     return post
   }
 
-  //load posts(main page)
+  async seachPosts(title: string, page: number, pageSize: number): Promise<any> {
+    const offset = (page - 1) * pageSize;
+    
+    const { count, rows } = await this.postRepository.findAndCountAll({
+      where: { title: { [Op.like]: `%${title}%` } },
+      include: [
+        {
+          model: User,
+          as:'author',
+          attributes: ['id', 'avatar', 'nickname']
+        },
+        {
+          model: CommentsModel,
+          attributes: ['id',]
+        },
+        {
+          model: Hab,
+          through: { attributes: [] },
+          attributes: ['id', 'title']
+        },
+      ],
+      attributes: {
+        include: [
+          [
+            sequelize.literal(`(
+              SELECT COUNT(*)
+              FROM "user_favorite_posts"
+              WHERE "user_favorite_posts"."postId" = "PostModel"."id"
+            )`),
+            'favoritesCount'
+          ],
+          [
+            sequelize.literal(`(
+            SELECT COUNT(*)
+            FROM "comments"
+            WHERE "comments"."postId" = "PostModel"."id"
+          )`),
+            'commentsCount'
+          ]
+        ]
+      },
+      limit: pageSize,
+      offset: offset,
+      distinct: true,
+    });
+
+    return {
+      posts: rows,
+      length: count
+    };
+  }
+
+  async loadWeeklyPosts(category:string){
+    const whereCategory = category !== 'all' ? { category } : {}
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+    const posts = await this.postRepository.findAll({
+      where: [
+        whereCategory,
+        {
+          createdAt: {
+            [Op.gte]: oneWeekAgo
+          }
+        }
+      ],
+      attributes: {
+        include: [
+          [
+            sequelize.literal(`(
+              SELECT COUNT(*)
+              FROM "user_favorite_posts"
+              WHERE "user_favorite_posts"."postId" = "PostModel"."id"
+            )`),
+            'favoritesCount'
+          ],
+          [
+            sequelize.literal(`(
+            SELECT COUNT(*)
+            FROM "comments"
+            WHERE "comments"."postId" = "PostModel"."id"
+          )`),
+            'commentsCount'
+          ]
+        ]
+      },
+      order:[
+        ['views','desc']
+      ],
+      limit:6
+    })
+
+    return posts
+  }
+
   async loadPosts(category: string, type: string, page: number, pageSize){
     const offset = (page - 1) * pageSize;
     const myWhere = category === 'all' ? {type} : {category, type}
@@ -125,7 +215,6 @@ export class PostsService {
     };
   }
 
-  //delete post
   async delePostById(postId:number, userId:number){
     const post = await this.loadPostById(postId)
     const isUserHasRoles = await this.usersService.checkUserRoles(userId)
@@ -142,12 +231,6 @@ export class PostsService {
 
       await post.destroy()
 
-     
-
-      // const favoriteDeletions = favorites.map(favorite => favorite.destroy());
-      // await Promise.all(favoriteDeletions);
-      // await this.habsService.deleteHabPost(postId)
-
       return {
         success: true
       }
@@ -158,7 +241,6 @@ export class PostsService {
     }
   }
 
-  //load user posts
   async loadUserPosts(userId:number, type:string, page:number, pageSize:number){
     const offset = (page - 1) * pageSize;
 
@@ -207,7 +289,6 @@ export class PostsService {
     };
   }
 
-  //load hab posts
   async loadHabPosts(habId: number, type: string, page: number, pageSize: number) {
     const offset = (page - 1) * pageSize;
 
@@ -257,104 +338,6 @@ export class PostsService {
     };
   }
 
-  //search posts
-  async seachPosts(title:string, page:number, pageSize:number){
-    const offset = (page - 1) * pageSize;
-    
-    const { count, rows } = await this.postRepository.findAndCountAll({
-      where: { title: { [Op.like]: `%${title}%` } },
-      include: [
-        {
-          model: User,
-          as:'author',
-          attributes: ['id', 'avatar', 'nickname']
-        },
-        {
-          model: CommentsModel,
-          attributes: ['id',]
-        },
-        {
-          model: Hab,
-          through: { attributes: [] },
-          attributes: ['id', 'title']
-        },
-      ],
-      attributes: {
-        include: [
-          [
-            sequelize.literal(`(
-              SELECT COUNT(*)
-              FROM "user_favorite_posts"
-              WHERE "user_favorite_posts"."postId" = "PostModel"."id"
-            )`),
-            'favoritesCount'
-          ],
-          [
-            sequelize.literal(`(
-            SELECT COUNT(*)
-            FROM "comments"
-            WHERE "comments"."postId" = "PostModel"."id"
-          )`),
-            'commentsCount'
-          ]
-        ]
-      },
-      limit: pageSize,
-      offset: offset,
-      distinct: true,
-    });
-
-    return {
-      posts: rows,
-      length: count
-    };
-  }
-
-  //load weekly posts on sidebar
-  async loadWeeklyPosts(category:string){
-    const whereCategory = category !== 'all' ? { category } : {}
-    const oneWeekAgo = new Date();
-    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-
-    const posts = await this.postRepository.findAll({
-      where: [
-        whereCategory,
-        {
-          createdAt: {
-            [Op.gte]: oneWeekAgo
-          }
-        }
-      ],
-      attributes: {
-        include: [
-          [
-            sequelize.literal(`(
-              SELECT COUNT(*)
-              FROM "user_favorite_posts"
-              WHERE "user_favorite_posts"."postId" = "PostModel"."id"
-            )`),
-            'favoritesCount'
-          ],
-          [
-            sequelize.literal(`(
-            SELECT COUNT(*)
-            FROM "comments"
-            WHERE "comments"."postId" = "PostModel"."id"
-          )`),
-            'commentsCount'
-          ]
-        ]
-      },
-      order:[
-        ['views','desc']
-      ],
-      limit:6
-    })
-
-    return posts
-  }
-
-  //load user favorites posts
   async loadUserFavoritesPosts(userId: number,type:string, page: number, pageSize: number) {
     const offset = (page - 1) * pageSize;
 

@@ -54,7 +54,7 @@ import { MailModule } from './mail/mail.module';
         },
       },
     }),
-    ConfigModule.forRoot({envFilePath:`.env.${process.env.NODE_ENV}`}),
+    ConfigModule.forRoot({envFilePath:`.env.${process.env.NODE_ENV}`,isGlobal:true}),
     ServeStaticModule.forRoot({
       rootPath: path.join(__dirname, "../uploads"),
       serveRoot: '/uploads',
