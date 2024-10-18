@@ -2,26 +2,27 @@ import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { mockPosts, postMock, postNewPost } from "src/utils/mocks/posts";
 import { CreatePostDto } from "./dto/create-post.dto";
 import { PostsUtilService } from "./types";
+import { PostModel } from "./posts.model";
 
 @Injectable()
 export class PostsMockService  implements PostsUtilService {
   constructor() {}
 
-  async createPost(dto: CreatePostDto): Promise<any> {
+  async createPost(dto: CreatePostDto){
     return{
       ...postNewPost,
       ...dto,
-    }
+    } as unknown as PostModel
   }
 
-  async loadPostById(postId: number): Promise<any> {
+  async loadPostById(postId: number) {
     const post = mockPosts.find((el) => el.id === postId)
 
     if(!post){
       throw new HttpException('Такого поста не существует', HttpStatus.NOT_FOUND)
     }
 
-    return post
+    return post as unknown as PostModel
   }
 
   async seachPosts(title: string, page: number, pageSize: number){
@@ -30,12 +31,12 @@ export class PostsMockService  implements PostsUtilService {
     );
     return {
       length: filteredPosts.length,
-      posts: filteredPosts.slice((page - 1) * pageSize, page * pageSize),
+      posts: filteredPosts.slice((page - 1) * pageSize, page * pageSize) as unknown as PostModel[],
     };
   }
 
   async loadWeeklyPosts(category: string) {
-    return mockPosts.filter(el => el.category === category)
+    return mockPosts.filter(el => el.category === category) as unknown as PostModel[]
   }
 
   async loadPosts(category: string, type: string, page: number, pageSize: number) {
@@ -44,7 +45,7 @@ export class PostsMockService  implements PostsUtilService {
     
     return {
       length: filteredPosts.length, 
-      posts: paginatedPosts, 
+      posts: paginatedPosts as unknown as PostModel[], 
     };
   }
 
@@ -60,7 +61,7 @@ export class PostsMockService  implements PostsUtilService {
     
     return {
       length: filteredPosts.length, 
-      posts: paginatedPosts, 
+      posts: paginatedPosts as unknown as PostModel[], 
     };
   }
 
@@ -74,7 +75,7 @@ export class PostsMockService  implements PostsUtilService {
 
     return {
       length: filteredPosts.length,
-      posts: filteredPosts.slice(start, end),
+      posts: filteredPosts.slice(start, end) as unknown as PostModel[],
     };
   }
 
@@ -84,7 +85,7 @@ export class PostsMockService  implements PostsUtilService {
     
     return {
       length: filteredPosts.length, 
-      posts: paginatedPosts, 
+      posts: paginatedPosts as unknown as PostModel[], 
     };
   }
 }

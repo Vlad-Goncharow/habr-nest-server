@@ -20,7 +20,7 @@ export class PostsRealService implements PostsUtilService {
     private commentsService: CommentsService, 
   ) {}
 
-  async createPost(dto: CreatePostDto,userId:any): Promise<any> {
+  async createPost(dto: CreatePostDto,userId:any) {
     const post = await this.postRepository.create({ ...dto, userId});
     const habs = await this.habsService.getHabs(dto.habs);
 
@@ -34,7 +34,7 @@ export class PostsRealService implements PostsUtilService {
     return post
   }
 
-  async loadPostById(postId: number): Promise<any> {
+  async loadPostById(postId: number) {
     const post = await this.postRepository.findByPk(postId, {
       include:[
         {
@@ -68,7 +68,7 @@ export class PostsRealService implements PostsUtilService {
     return post
   }
 
-  async seachPosts(title: string, page: number, pageSize: number): Promise<any> {
+  async seachPosts(title: string, page: number, pageSize: number) {
     const offset = (page - 1) * pageSize;
     
     const { count, rows } = await this.postRepository.findAndCountAll({
@@ -163,7 +163,7 @@ export class PostsRealService implements PostsUtilService {
     return posts
   }
 
-  async loadPosts(category: string, type: string, page: number, pageSize){
+  async loadPosts(category: string, type: string, page: number, pageSize) {
     const offset = (page - 1) * pageSize;
     const myWhere = category === 'all' ? {type} : {category, type}
     
