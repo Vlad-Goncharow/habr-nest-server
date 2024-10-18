@@ -25,7 +25,7 @@ export class AuthRealService implements AuthUtilService {
     }
 
     if (candidateNickname){
-      throw new HttpException({ message: 'Данная ник занят', param:'nickname'}, HttpStatus.BAD_REQUEST)
+      throw new HttpException({ message: 'Данный ник занят', param:'nickname'}, HttpStatus.BAD_REQUEST)
     }
 
     const hashPassword = await bcrypt.hash(dto.password, 5)
