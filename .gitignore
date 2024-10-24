@@ -1,6 +1,7 @@
 # compiled output
 /dist
-/uploads
+/uploads*
+!/uploads/avatars/user_alt.png
 /node_modules
 
 # Logs
