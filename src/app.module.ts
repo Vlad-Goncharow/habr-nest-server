@@ -39,8 +39,8 @@ import { MailModule } from './mail/mail.module';
         port: 465, 
         secure: true,
         auth: {
-          user: "vladuska159@gmail.com",
-          pass: "tcxf djtt frpv rasp",
+          user: process.env.MAIL_USER,
+          pass: process.env.MAIL_PASSWORD,
         },
       },
       defaults: {
